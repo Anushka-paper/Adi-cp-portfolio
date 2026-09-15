@@ -20,7 +20,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] LeetCode adapter (GraphQL, unofficial — isolated behind adapter) — verified live
 - [x] Postgres schema: snapshots table (`data`, `fetched_at`, `status`) + curated content table
 - [x] `/api/sync` route — calls adapters, writes snapshots, degrades per-platform on failure
-- [x] Vercel Cron config (6h cadence, `vercel.json`)
+- [x] Vercel Cron config (`vercel.json`) — daily cadence; see Notes on the Hobby plan limit
 - [x] Unified rating timeline chart (Recharts) with table fallback for accessibility
 - [x] Per-platform stat cards (current/max rating, rank, solved count)
 - [x] Activity heatmap (calendar-style, solved/submission counts) — 26-week grid, per-platform tooltip, text-table fallback
@@ -55,3 +55,4 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - `Index.html` is the legacy static page — will be retired once the Next.js app replaces it.
 - To go live: provision Postgres, set `DATABASE_URL`/`CODEFORCES_HANDLE`/`LEETCODE_HANDLE`/`CRON_SECRET`/`ADMIN_PASSWORD`/`ADMIN_SESSION_SECRET` env vars, run `npm run db:push`, then hit `/api/sync` once (or wait for the Vercel Cron). Visit `/admin` to edit bio/avatar/name/role/email.
 - Admin auth flow (redirect-to-login, wrong-password rejection, successful login) verified end-to-end with Playwright.
+- **Cron cadence deviates from PRD §1's "never more than 6h stale" KPI**: Vercel's Hobby plan only allows cron jobs to run once per day, so `vercel.json` runs `/api/sync` daily instead of every 6h. First deploy failed for exactly this reason (schedule was `0 */6 * * *`). Options if fresher data matters: upgrade to Vercel Pro (restores 6h cadence), or ship the "resync now" admin action from Phase 1.1 sooner so the owner can manually trigger a sync between daily runs.

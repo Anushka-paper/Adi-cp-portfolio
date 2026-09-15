@@ -24,7 +24,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] Unified rating timeline chart (Recharts) with table fallback for accessibility
 - [x] Per-platform stat cards (current/max rating, rank, solved count)
 - [x] Activity heatmap (calendar-style, solved/submission counts) — 26-week grid, per-platform tooltip, text-table fallback
-- [ ] Editable bio/avatar/social links (curated content, no redeploy needed) — schema exists, no admin UI yet
+- [x] Editable bio/avatar/social links (curated content, no redeploy needed) — `/admin` behind single-credential auth (signed HMAC cookie), server-action form, home page reads from DB with default fallback
 - [x] "Last synced" relative timestamp per platform
 - [ ] Responsive layout 320px–1440px+
 - [ ] Accessibility pass (keyboard nav, focus states, `prefers-reduced-motion`, `prefers-color-scheme`)
@@ -53,4 +53,5 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - DB host (Neon vs Supabase): **TBD** — schema/client are host-agnostic (plain `postgres://` URL), so this only needs `DATABASE_URL` set whenever a host is picked. Home page gracefully renders an empty state until then.
 - MVP platforms: Codeforces + LeetCode (per PRD default)
 - `Index.html` is the legacy static page — will be retired once the Next.js app replaces it.
-- To go live: provision Postgres, set `DATABASE_URL`/`CODEFORCES_HANDLE`/`LEETCODE_HANDLE`/`CRON_SECRET` env vars, run `npm run db:push`, then hit `/api/sync` once (or wait for the Vercel Cron).
+- To go live: provision Postgres, set `DATABASE_URL`/`CODEFORCES_HANDLE`/`LEETCODE_HANDLE`/`CRON_SECRET`/`ADMIN_PASSWORD`/`ADMIN_SESSION_SECRET` env vars, run `npm run db:push`, then hit `/api/sync` once (or wait for the Vercel Cron). Visit `/admin` to edit bio/avatar/name/role/email.
+- Admin auth flow (redirect-to-login, wrong-password rejection, successful login) verified end-to-end with Playwright.

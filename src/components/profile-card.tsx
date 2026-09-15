@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Image from "next/image";
 import { motion, useReducedMotion } from "motion/react";
 import { Clock, Copy, Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -98,7 +97,8 @@ export function ProfileCard({
 
         {/* Identity block */}
         <div className="flex flex-wrap items-center gap-5">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element -- avatarSrc is an admin-editable arbitrary URL, not a known-domain asset */}
+          <img
             src={avatarSrc}
             alt=""
             width={56}

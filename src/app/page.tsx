@@ -3,16 +3,21 @@ import { PlatformCard } from "@/components/platform-card";
 import { RatingChart } from "@/components/rating-chart";
 import { ActivityHeatmap } from "@/components/activity-heatmap";
 import { getSnapshots } from "@/lib/get-snapshots";
+import { getProfileContent } from "@/lib/profile-content";
 
 export default async function Home() {
-  const snapshots = await getSnapshots();
+  const [snapshots, content] = await Promise.all([
+    getSnapshots(),
+    getProfileContent(),
+  ]);
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center gap-16 px-4 py-24">
       <ProfileCard
-        name="Aditya"
-        role="Competitive Programmer"
-        email="aditya@example.com"
+        name={content.name}
+        role={content.role}
+        email={content.email}
+        avatarSrc={content.avatarUrl}
         statusText="Grinding rating"
         glowText="Codeforces Expert"
       />

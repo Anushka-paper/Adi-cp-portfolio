@@ -26,9 +26,9 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] Activity heatmap (calendar-style, solved/submission counts) — 26-week grid, per-platform tooltip, text-table fallback
 - [x] Editable bio/avatar/social links (curated content, no redeploy needed) — `/admin` behind single-credential auth (signed HMAC cookie), server-action form, home page reads from DB with default fallback
 - [x] "Last synced" relative timestamp per platform
-- [ ] Responsive layout 320px–1440px+
-- [ ] Accessibility pass (keyboard nav, focus states, `prefers-reduced-motion`, `prefers-color-scheme`)
-- [ ] Deploy to Vercel
+- [x] Responsive layout 320px–1440px+ — verified via screenshots at both breakpoints, no horizontal overflow
+- [x] Accessibility pass — `prefers-reduced-motion` gates the card entrance animation, `prefers-color-scheme` now drives the CSS token dark palette (was previously wired to an unused `.dark` class), shadcn primitives (Button/Card/Badge) provide focus-visible rings and keyboard nav for free, charts/heatmap have `sr-only` table fallbacks
+- [ ] Deploy to Vercel — requires the owner's Vercel account; not something this session can do
 
 ## Phase 1.1
 - [ ] AtCoder adapter

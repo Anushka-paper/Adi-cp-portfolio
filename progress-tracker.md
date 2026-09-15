@@ -44,10 +44,10 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] Theme polish (dark/light)
 
 ## Quality Gates (ongoing)
-- [ ] Vitest + Testing Library unit tests
-- [ ] Playwright smoke E2E
+- [x] Vitest unit/contract tests for adapters (`npm run test`) — Codeforces + LeetCode, fixture-mocked `fetch`, cover success + failure paths
+- [x] Playwright smoke E2E (`npm run test:e2e`) — home page renders without crashing (no DB configured), copy-email interaction
 - [ ] Lighthouse CI (Perf ≥ 95, A11y = 100)
-- [ ] Contract tests for LeetCode/CodeChef adapters against fixtures
+- [x] Contract tests for LeetCode adapter against fixtures (CodeChef adapter doesn't exist yet — v1.1)
 
 ## Notes / Decisions
 - DB host (Neon vs Supabase): **TBD** — schema/client are host-agnostic (plain `postgres://` URL), so this only needs `DATABASE_URL` set whenever a host is picked. Home page gracefully renders an empty state until then.

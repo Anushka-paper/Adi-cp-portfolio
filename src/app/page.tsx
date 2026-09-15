@@ -1,6 +1,7 @@
 import { ProfileCard } from "@/components/profile-card";
 import { PlatformCard } from "@/components/platform-card";
 import { RatingChart } from "@/components/rating-chart";
+import { ActivityHeatmap } from "@/components/activity-heatmap";
 import { getSnapshots } from "@/lib/get-snapshots";
 
 export default async function Home() {
@@ -21,6 +22,13 @@ export default async function Home() {
           Rating history
         </h2>
         <RatingChart snapshots={snapshots} />
+      </section>
+
+      <section className="w-full space-y-4">
+        <h2 className="text-lg font-semibold tracking-tight">
+          Activity
+        </h2>
+        <ActivityHeatmap snapshots={snapshots} />
       </section>
 
       <section className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">

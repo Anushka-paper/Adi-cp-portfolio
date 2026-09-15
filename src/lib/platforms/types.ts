@@ -7,6 +7,11 @@ export interface RatingPoint {
   rating: number;
 }
 
+export interface ActivityDay {
+  date: string; // YYYY-MM-DD
+  count: number;
+}
+
 export interface NormalizedProfile {
   platform: Platform;
   handle: string;
@@ -15,6 +20,7 @@ export interface NormalizedProfile {
   maxRating: number | null;
   rank: string | null;
   ratingHistory: RatingPoint[];
+  activityCalendar: ActivityDay[];
   solvedCount: number | null;
   fetchedAt: string; // ISO 8601
 }

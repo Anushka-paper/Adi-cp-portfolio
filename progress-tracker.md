@@ -23,7 +23,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] Vercel Cron config (6h cadence, `vercel.json`)
 - [x] Unified rating timeline chart (Recharts) with table fallback for accessibility
 - [x] Per-platform stat cards (current/max rating, rank, solved count)
-- [ ] Activity heatmap (calendar-style, solved/submission counts)
+- [x] Activity heatmap (calendar-style, solved/submission counts) — 26-week grid, per-platform tooltip, text-table fallback
 - [ ] Editable bio/avatar/social links (curated content, no redeploy needed) — schema exists, no admin UI yet
 - [x] "Last synced" relative timestamp per platform
 - [ ] Responsive layout 320px–1440px+

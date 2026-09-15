@@ -1,4 +1,9 @@
-import type { NormalizedProfile, PlatformAdapter, RatingPoint } from "./types";
+import type {
+  ActivityDay,
+  NormalizedProfile,
+  PlatformAdapter,
+  RatingPoint,
+} from "./types";
 
 interface CFUserInfo {
   handle: string;
@@ -17,6 +22,7 @@ interface CFRatingChange {
 
 interface CFSubmission {
   verdict?: string;
+  creationTimeSeconds: number;
   problem: { contestId?: number; index: string; name: string };
 }
 
@@ -59,6 +65,18 @@ async function fetchProfile(handle: string): Promise<NormalizedProfile> {
       .map((s) => `${s.problem.contestId ?? ""}${s.problem.index}`),
   );
 
+  const activityByDate = new Map<string, number>();
+  for (const submission of submissions) {
+    const date = new Date(submission.creationTimeSeconds * 1000)
+      .toISOString()
+      .slice(0, 10);
+    activityByDate.set(date, (activityByDate.get(date) ?? 0) + 1);
+  }
+  const activityCalendar: ActivityDay[] = Array.from(
+    activityByDate,
+    ([date, count]) => ({ date, count }),
+  );
+
   const ratingHistory: RatingPoint[] = ratingChanges.map((change) => ({
     contestId: String(change.contestId),
     contestName: change.contestName,
@@ -74,6 +92,7 @@ async function fetchProfile(handle: string): Promise<NormalizedProfile> {
     maxRating: userInfo.maxRating ?? null,
     rank: userInfo.rank ?? null,
     ratingHistory,
+    activityCalendar,
     solvedCount: solvedProblems.size,
     fetchedAt: new Date().toISOString(),
   };

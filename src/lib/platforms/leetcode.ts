@@ -1,4 +1,9 @@
-import type { NormalizedProfile, PlatformAdapter, RatingPoint } from "./types";
+import type {
+  ActivityDay,
+  NormalizedProfile,
+  PlatformAdapter,
+  RatingPoint,
+} from "./types";
 
 const GRAPHQL_ENDPOINT = "https://leetcode.com/graphql";
 
@@ -18,6 +23,7 @@ const QUERY = `
           count
         }
       }
+      submissionCalendar
     }
     userContestRankingHistory(username: $username) {
       attended
@@ -38,6 +44,7 @@ interface LeetCodeGraphQLResponse {
       submitStats: {
         acSubmissionNum: { difficulty: string; count: number }[];
       };
+      submissionCalendar: string;
     } | null;
     userContestRankingHistory:
       | {
@@ -78,6 +85,22 @@ async function fetchProfile(handle: string): Promise<NormalizedProfile> {
     (s) => s.difficulty === "All",
   )?.count;
 
+  let activityCalendar: ActivityDay[] = [];
+  try {
+    const calendar = JSON.parse(matchedUser.submissionCalendar) as Record<
+      string,
+      number
+    >;
+    activityCalendar = Object.entries(calendar).map(
+      ([unixSeconds, count]) => ({
+        date: new Date(Number(unixSeconds) * 1000).toISOString().slice(0, 10),
+        count,
+      }),
+    );
+  } catch {
+    activityCalendar = [];
+  }
+
   const attended = (userContestRankingHistory ?? []).filter((c) => c.attended);
   const ratingHistory: RatingPoint[] = attended.map((c) => ({
     contestId: c.contest.title,
@@ -100,6 +123,7 @@ async function fetchProfile(handle: string): Promise<NormalizedProfile> {
       ? `Rank ${matchedUser.profile.ranking}`
       : null,
     ratingHistory,
+    activityCalendar,
     solvedCount: totalSolved ?? null,
     fetchedAt: new Date().toISOString(),
   };

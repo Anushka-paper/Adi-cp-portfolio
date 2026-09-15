@@ -2,6 +2,7 @@ import { ProfileCard } from "@/components/profile-card";
 import { PlatformCard } from "@/components/platform-card";
 import { RatingChart } from "@/components/rating-chart";
 import { ActivityHeatmap } from "@/components/activity-heatmap";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { getSnapshots } from "@/lib/get-snapshots";
 import { getProfileContent } from "@/lib/profile-content";
 
@@ -13,6 +14,10 @@ export default async function Home() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center gap-16 px-4 py-24">
+      <div className="fixed right-4 top-4 z-20">
+        <ThemeToggle />
+      </div>
+
       <ProfileCard
         name={content.name}
         role={content.role}

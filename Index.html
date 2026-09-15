@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aditya — Competitive Programmer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,380;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #0A0E17;
+    --ink-soft: #141B2B;
+    --paper: #E9E4D3;
+    --paper-dim: #9C9583;
+    --line-ink: #2A3346;
+    --line-paper: #CFC8B3;
+
+    --r-gray:   #9C9C9C;
+    --r-green:  #58B94A;
+    --r-cyan:   #1FA8AE;
+    --r-blue:   #3B6FD4;
+    --r-violet: #9A55D6;
+    --r-orange: #DB8A2E;
+    --r-red:    #E0453F;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'JetBrains Mono', monospace;
+    line-height:1.6;
+  }
+  ::selection{ background:var(--r-red); color:var(--paper); }
+  h1,h2,h3{ font-family:'Fraunces', serif; font-weight:500; margin:0; }
+  a{ color:inherit; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 32px; }
+
+  /* ================= HERO — split ink / paper ================= */
+  .hero{
+    display:grid;
+    grid-template-columns: 1.35fr 1fr;
+    min-height:100vh;
+  }
+  .hero-ink{
+    background:var(--ink);
+    color:var(--paper);
+    position:relative;
+    padding:44px 48px 0;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    overflow:hidden;
+    background-image:
+      repeating-linear-gradient(0deg, rgba(233,228,211,0.05) 0 1px, transparent 1px 48px),
+      repeating-linear-gradient(90deg, rgba(233,228,211,0.05) 0 1px, transparent 1px 48px);
+  }
+  .brand{ font-size:13px; letter-spacing:0.02em; color:var(--paper-dim); }
+  .hero-title{
+    font-size:clamp(52px, 8.5vw, 108px);
+    line-height:0.94;
+    letter-spacing:-0.01em;
+    margin-top:28px;
+  }
+  .hero-title em{ font-style:italic; font-weight:380; color:#B9B29A; }
+  .hero-tag{
+    margin-top:22px;
+    max-width:42ch;
+    font-size:15px;
+    color:var(--paper-dim);
+  }
+
+  .graph-wrap{ position:relative; margin-top:36px; }
+  .graph-wrap svg{ display:block; width:100%; height:150px; }
+  .graph-line{
+    fill:none;
+    stroke-width:2.5;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-dasharray:1000;
+    stroke-dashoffset:1000;
+    animation:draw 1.8s cubic-bezier(.22,.9,.28,1) forwards .3s;
+  }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+  .graph-dot{
+    opacity:0;
+    animation:pop .5s ease forwards 2s;
+  }
+  @keyframes pop{ to{ opacity:1; } }
+  .graph-pulse{
+    animation:pulse 2.2s ease-in-out infinite 2.1s;
+    transform-origin:center;
+  }
+  @keyframes pulse{
+    0%,100%{ opacity:.55; transform:scale(1); }
+    50%{ opacity:0; transform:scale(2.6); }
+  }
+  .graph-foot{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:var(--paper-dim);
+    padding:10px 0 28px;
+    border-top:1px solid rgba(233,228,211,0.15);
+  }
+
+  /* ---- right scoreboard panel ---- */
+  .hero-paper{
+    padding:48px 40px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:0;
+  }
+  .score-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:16px 0;
+    border-bottom:1px dotted var(--line-paper);
+    font-size:13px;
+  }
+  .score-row:first-child{ padding-top:0; }
+  .score-row .k{ color:var(--paper-dim); }
+  .score-row .v{ font-weight:600; font-size:15px; }
+  .score-row .v.rating{ color:var(--r-red); }
+  .score-row .v.rank{ color:var(--r-orange); }
+
+  /* ================= SECTIONS ================= */
+  section{ padding:88px 0; border-top:1px solid var(--line-paper); }
+  .sec-head{
+    display:grid;
+    grid-template-columns:90px 1fr;
+    align-items:start;
+    margin-bottom:40px;
+  }
+  .sec-letter{
+    font-family:'Fraunces', serif;
+    font-size:56px;
+    color:var(--line-paper);
+    line-height:1;
+  }
+  .sec-head h2{ font-size:30px; }
+  .sec-head .sub{ font-size:13px; color:var(--paper-dim); margin-top:6px; }
+
+  .about-body{ display:grid; grid-template-columns:90px 1fr; gap:0 0; }
+  .about-lead{
+    grid-column:2;
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    font-weight:380;
+    max-width:52ch;
+    margin-bottom:36px;
+  }
+  ul.highlights{ grid-column:2; list-style:none; margin:0; padding:0; max-width:64ch; }
+  ul.highlights li{
+    display:grid;
+    grid-template-columns:96px 1fr;
+    gap:18px;
+    font-size:14px;
+    padding:16px 0;
+    border-bottom:1px dotted var(--line-paper);
+  }
+  ul.highlights li:last-child{ border-bottom:none; }
+  ul.highlights .tag{ font-size:11px; color:var(--r-cyan); align-self:baseline; }
+  ul.highlights strong{ font-weight:600; }
+
+  /* ---- verdict project cards ---- */
+  .projects{ display:grid; grid-template-columns:90px 1fr; }
+  .proj-list{ grid-column:2; display:grid; gap:1px; background:var(--line-paper); border:1px solid var(--line-paper); }
+  .proj{ background:var(--paper); padding:26px 28px; }
+  .proj-top{ display:flex; align-items:center; gap:14px; margin-bottom:12px; }
+  .proj-top h3{ font-size:21px; }
+  .proj-id{ font-size:11px; color:var(--paper-dim); }
+  .verdict{
+    margin-left:auto;
+    font-size:11px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    color:var(--r-green);
+    border:1px solid var(--r-green);
+    padding:4px 10px;
+  }
+  .verdict::before{ content:"●"; font-size:8px; }
+  .proj p{ margin:0 0 14px; font-size:14px; color:#3a3a32; max-width:58ch; }
+  .proj-meta{ font-size:11.5px; color:var(--paper-dim); display:flex; gap:18px; }
+  .proj-meta b{ color:var(--ink); font-weight:600; }
+
+  /* ---- links: color-inversion tiles ---- */
+  .links{ display:grid; grid-template-columns:90px 1fr; }
+  .link-grid{
+    grid-column:2;
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:1px;
+    background:var(--line-paper);
+    border:1px solid var(--line-paper);
+  }
+  .link-tile{
+    background:var(--paper);
+    padding:26px 20px;
+    text-decoration:none;
+    display:flex;
+    flex-direction:column;
+    gap:26px;
+    transition:background .18s ease, color .18s ease;
+  }
+  .link-tile:hover{ background:var(--ink); color:var(--paper); }
+  .link-tile .name{ font-size:14px; }
+  .link-tile .arrow{ font-size:18px; align-self:flex-end; }
+
+  footer{
+    padding:36px 0 56px;
+    font-size:11.5px;
+    color:var(--paper-dim);
+    display:flex;
+    justify-content:space-between;
+    border-top:1px solid var(--line-paper);
+  }
+
+  @media (max-width: 860px){
+    .hero{ grid-template-columns:1fr; }
+    .hero-paper{ border-top:1px solid rgba(233,228,211,0.2); }
+    .sec-letter{ font-size:40px; }
+    .sec-head, .about-body, .projects, .links{ grid-template-columns:56px 1fr; }
+    .link-grid{ grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-ink">
+    <div class="brand">aditya.dev — competitive programming</div>
+
+    <div>
+      <h1 class="hero-title">Aditya<br><em>[Surname]</em></h1>
+      <p class="hero-tag">Competitive programmer and software engineer. I build tools for the CP community and mentor climbers headed for Candidate Master and above.</p>
+    </div>
+
+    <div class="graph-wrap">
+      <svg viewBox="0 0 600 150" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="ratingGrad" x1="0" y1="0" x2="600" y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"  stop-color="var(--r-gray)"/>
+            <stop offset="20%" stop-color="var(--r-green)"/>
+            <stop offset="40%" stop-color="var(--r-cyan)"/>
+            <stop offset="58%" stop-color="var(--r-blue)"/>
+            <stop offset="75%" stop-color="var(--r-violet)"/>
+            <stop offset="90%" stop-color="var(--r-orange)"/>
+            <stop offset="100%" stop-color="var(--r-red)"/>
+          </linearGradient>
+        </defs>
+        <polyline class="graph-line" pathLength="1000" stroke="url(#ratingGrad)"
+          points="0,140 45,122 90,128 135,98 180,108 225,78 270,90 315,60 360,70 405,42 450,50 500,26 545,32 600,18" />
+        <circle class="graph-dot graph-pulse" cx="600" cy="18" r="12" fill="var(--r-red)" opacity=".5"/>
+        <circle class="graph-dot" cx="600" cy="18" r="4.5" fill="var(--r-red)"/>
+      </svg>
+      <div class="graph-foot">
+        <span>2019</span><span>2020</span><span>2021</span><span>2022</span><span>2023</span><span>2024</span><span>2026</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-paper">
+    <div class="score-row"><span class="k">handle</span><span class="v">aditya_cp</span></div>
+    <div class="score-row"><span class="k">rating</span><span class="v rating">2134</span></div>
+    <div class="score-row"><span class="k">rank</span><span class="v rank">Candidate Master</span></div>
+    <div class="score-row"><span class="k">max rating</span><span class="v">2201</span></div>
+    <div class="score-row"><span class="k">contests</span><span class="v">96</span></div>
+    <div class="score-row"><span class="k">problems solved</span><span class="v">1,840</span></div>
+  </div>
+</div>
+
+<section id="about">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-letter">A</span>
+      <div><h2>About</h2><div class="sub">background</div></div>
+    </div>
+    <div class="about-body">
+      <p class="about-lead">Seven years of competitive programming, two open-source tools built along the way, and a growing group of mentees climbing the same ladder.</p>
+      <ul class="highlights">
+        <li><span class="tag">RESULT</span><span><strong>Top 0.5%</strong> on Codeforces — dummy figure, swap for your real percentile</span></li>
+        <li><span class="tag">TEACH</span><span>Mentored <strong>40+ students</strong> from unrated to Expert and beyond</span></li>
+        <li><span class="tag">BUILD</span><span>Maintain <strong>CP-U</strong> and <strong>CpAlgo</strong>, used by hundreds of competitive programmers</span></li>
+        <li><span class="tag">WORK</span><span>Software Engineer, working on systems and backend infrastructure</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-letter">B</span>
+      <div><h2>Projects</h2><div class="sub">built & maintained</div></div>
+    </div>
+    <div class="projects">
+      <div class="proj-list">
+        <div class="proj">
+          <div class="proj-top"><h3>CP-U</h3><span class="proj-id">#0231</span><span class="verdict">Accepted</span></div>
+          <p>A curriculum and problem-set tracker for competitive programmers moving from beginner to Expert level.</p>
+          <div class="proj-meta"><span>contributors <b>12</b></span><span>stars <b>340</b></span><span>since <b>2022</b></span></div>
+        </div>
+        <div class="proj">
+          <div class="proj-top"><h3>CpAlgo</h3><span class="proj-id">#0198</span><span class="verdict">Accepted</span></div>
+          <p>A reference library of algorithm implementations and editorial notes, built for fast lookup during contests and upsolving.</p>
+          <div class="proj-meta"><span>contributors <b>8</b></span><span>stars <b>512</b></span><span>since <b>2021</b></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="links">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-letter">C</span>
+      <div><h2>Links</h2><div class="sub">find me elsewhere</div></div>
+    </div>
+    <div class="links">
+      <div class="link-grid">
+        <a class="link-tile" href="#"><span class="name">Codeforces</span><span class="arrow">↗</span></a>
+        <a class="link-tile" href="#"><span class="name">AtCoder</span><span class="arrow">↗</span></a>
+        <a class="link-tile" href="#"><span class="name">CodeChef</span><span class="arrow">↗</span></a>
+        <a class="link-tile" href="#"><span class="name">LeetCode</span><span class="arrow">↗</span></a>
+        <a class="link-tile" href="#"><span class="name">GitHub</span><span class="arrow">↗</span></a>
+        <a class="link-tile" href="#"><span class="name">LinkedIn</span><span class="arrow">↗</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%;">
+    <span>© 2026 Aditya</span>
+    <span>built with Claude</span>
+  </div>
+</footer>
+
+</body>
+</html>

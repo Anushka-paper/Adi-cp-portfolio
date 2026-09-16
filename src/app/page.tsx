@@ -49,7 +49,7 @@ export default async function Home() {
           extends below the card itself (see profile-card.tsx's
           -bottom-10 glow slab) further than the flex gap accounts for. */}
       <div className="mt-10 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
-        <Card className="sm:col-span-2 lg:col-span-7">
+        <Card className="sm:col-span-2 lg:col-span-12">
           <CardHeader>
             {/* Not CardTitle — it renders a <div>, not a heading, and
                 these are real page section headings. */}
@@ -57,18 +57,18 @@ export default async function Home() {
               Rating history
             </h2>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex justify-center">
             <RatingChart snapshots={snapshots} />
           </CardContent>
         </Card>
 
-        <Card className="sm:col-span-2 lg:col-span-5">
+        <Card className="sm:col-span-2 lg:col-span-12">
           <CardHeader>
             <h2 className="text-base leading-none font-semibold">
               Activity
             </h2>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex justify-center">
             <ActivityHeatmap snapshots={snapshots} />
           </CardContent>
         </Card>

@@ -53,7 +53,7 @@ export function GitHubCalendar({
       });
 
       weeksArray.push(
-        <div key={i} className="flex flex-col gap-1">
+        <div key={i} className="flex shrink-0 flex-col gap-1">
           {weekDays.map((day, index) => {
             const key = format(day, "yyyy-MM-dd");
             const contribution = byDate.get(key) ?? { date: key, count: 0 };
@@ -103,15 +103,15 @@ export function GitHubCalendar({
           scrollbar from a few px of sub-pixel text-line overflow in
           the day labels — overflow-y-hidden here is deliberate. */}
       <div className="scrollbar-themed flex overflow-x-auto overflow-y-hidden pb-2">
-        <div className="mr-2 mt-5.5 flex flex-col justify-between">
+        <div className="mr-2 mt-5.5 flex shrink-0 flex-col justify-between">
           {dayLabels.map((day) => (
             <span key={day} className="h-3 text-xs text-muted-foreground">
               {day}
             </span>
           ))}
         </div>
-        <div>
-          <div className="mb-2 flex w-full justify-between gap-4">
+        <div className="shrink-0">
+          <div className="mb-2 flex justify-between gap-4">
             {renderMonthLabels()}
           </div>
           <div className="flex gap-1">{renderWeeks()}</div>

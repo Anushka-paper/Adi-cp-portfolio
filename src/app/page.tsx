@@ -57,7 +57,12 @@ export default async function Home() {
               Rating history
             </h2>
           </CardHeader>
-          <CardContent className="flex justify-center">
+          {/* min-w-0 overrides the flex item's default min-width:
+              auto (Card is flex flex-col) — without it, CardContent
+              grows to fit the chart's content instead of staying
+              within the card, so the chart's own overflow-x-auto
+              scrollbar never actually engages. */}
+          <CardContent className="flex min-w-0 justify-center">
             <RatingChart snapshots={snapshots} />
           </CardContent>
         </Card>
@@ -68,7 +73,7 @@ export default async function Home() {
               Activity
             </h2>
           </CardHeader>
-          <CardContent className="flex justify-center">
+          <CardContent className="flex min-w-0 justify-center">
             <ActivityHeatmap snapshots={snapshots} />
           </CardContent>
         </Card>

@@ -65,7 +65,7 @@ export function RatingChart({ snapshots }: { snapshots: PlatformSnapshot[] }) {
   }
 
   return (
-    <div className="w-full" role="img" aria-label="Unified rating timeline across platforms">
+    <div className="w-full min-w-0" role="img" aria-label="Unified rating timeline across platforms">
       {/* min-width keeps the legend/axis labels from clipping on very
           narrow screens — scrolls instead of cutting off text. */}
       <div className="scrollbar-themed overflow-x-auto overflow-y-hidden">

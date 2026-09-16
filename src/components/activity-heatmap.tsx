@@ -51,7 +51,7 @@ export function ActivityHeatmap({
   const byDate = new Map(cells.map((c) => [c.date, c]));
 
   return (
-    <div>
+    <div className="min-w-0 max-w-full">
       <GitHubCalendar
         data={data}
         renderTooltip={(day) => {

@@ -168,10 +168,14 @@
 }
 
 /* Thin, theme-colored scrollbar for the chart/heatmap horizontal
-   scroll containers, instead of the native OS default. */
+   scroll containers, instead of the native OS default. Uses
+   muted-foreground rather than border — border is nearly invisible
+   against the background in both themes (light: oklch(0.922 0 0) on
+   a near-white page; dark: white at 10% opacity), which made the
+   scrollbar present but practically undiscoverable. */
 .scrollbar-themed {
   scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+  scrollbar-color: var(--muted-foreground) transparent;
 }
 .scrollbar-themed::-webkit-scrollbar {
   height: 8px;
@@ -180,9 +184,9 @@
   background: transparent;
 }
 .scrollbar-themed::-webkit-scrollbar-thumb {
-  background-color: var(--border);
+  background-color: var(--muted-foreground);
   border-radius: 9999px;
 }
 .scrollbar-themed::-webkit-scrollbar-thumb:hover {
-  background-color: var(--muted-foreground);
+  background-color: var(--foreground);
 }

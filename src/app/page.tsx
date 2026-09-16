@@ -3,6 +3,7 @@ import { PlatformCard } from "@/components/platform-card";
 import { RatingChart } from "@/components/rating-chart";
 import { ActivityHeatmap } from "@/components/activity-heatmap";
 import { AchievementCard } from "@/components/achievement-card";
+import { PlatformLinks } from "@/components/platform-links";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getSnapshots } from "@/lib/get-snapshots";
@@ -43,12 +44,25 @@ export default async function Home() {
         glowText={glowText}
       />
 
+      {/* Only one of these two gets the glow-clearance top margin —
+          whichever renders first right after the card — so it's never
+          doubled up when platform links exist. */}
+      {content.platformLinks.length > 0 && (
+        <div className="mt-10">
+          <PlatformLinks links={content.platformLinks} />
+        </div>
+      )}
+
       {/* Single column on mobile, 2 cols on tablet, a 12-col bento grid
           on desktop so tiles vary in size instead of stacking. Extra
           top margin clears the profile card's glow, which visually
           extends below the card itself (see profile-card.tsx's
           -bottom-10 glow slab) further than the flex gap accounts for. */}
-      <div className="mt-10 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
+      <div
+        className={`grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12 ${
+          content.platformLinks.length === 0 ? "mt-10" : ""
+        }`}
+      >
         <Card className="sm:col-span-2 lg:col-span-12">
           <CardHeader>
             {/* Not CardTitle — it renders a <div>, not a heading, and

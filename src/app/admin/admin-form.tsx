@@ -17,6 +17,10 @@ type FeaturedItem = { title: string; description: string; url: string };
 const MAX_FEATURED_ITEMS = 6;
 const EMPTY_ITEM: FeaturedItem = { title: "", description: "", url: "" };
 
+type PlatformLink = { name: string; logoUrl: string; url: string };
+const MAX_PLATFORM_LINKS = 8;
+const EMPTY_PLATFORM_LINK: PlatformLink = { name: "", logoUrl: "", url: "" };
+
 function AvatarUploader({ initialUrl }: { initialUrl: string }) {
   const [result, formAction, pending] = useActionState(uploadAvatar, null);
   const [avatarUrl, setAvatarUrl] = useState(initialUrl);
@@ -66,6 +70,7 @@ function AvatarUploader({ initialUrl }: { initialUrl: string }) {
 export function AdminForm({ content }: { content: ProfileContentData }) {
   const [message, formAction, pending] = useActionState(updateProfile, null);
   const [items, setItems] = useState<FeaturedItem[]>(content.featuredItems);
+  const [links, setLinks] = useState<PlatformLink[]>(content.platformLinks);
 
   function updateItem(index: number, patch: Partial<FeaturedItem>) {
     setItems((prev) =>
@@ -75,6 +80,16 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
 
   function removeItem(index: number) {
     setItems((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function updateLink(index: number, patch: Partial<PlatformLink>) {
+    setLinks((prev) =>
+      prev.map((link, i) => (i === index ? { ...link, ...patch } : link)),
+    );
+  }
+
+  function removeLink(index: number) {
+    setLinks((prev) => prev.filter((_, i) => i !== index));
   }
 
   return (
@@ -159,6 +174,75 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
           ))}
 
           <input type="hidden" name="featuredItems" value={JSON.stringify(items)} />
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-medium">
+              Platform Links ({links.length}/{MAX_PLATFORM_LINKS})
+            </h2>
+            <button
+              type="button"
+              disabled={links.length >= MAX_PLATFORM_LINKS}
+              onClick={() =>
+                setLinks((prev) => [...prev, { ...EMPTY_PLATFORM_LINK }])
+              }
+              className="text-sm font-medium underline underline-offset-4 disabled:opacity-40 disabled:no-underline"
+            >
+              + Add
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Circular logo icons linking out to your profile on each platform
+            — click the circle on the home page to open the link.
+          </p>
+
+          {links.map((link, index) => (
+            <div key={index} className="flex items-start gap-3 rounded-lg border p-3">
+              {/* eslint-disable-next-line @next/next/no-img-element -- preview of an admin-supplied arbitrary logo URL */}
+              <img
+                src={link.logoUrl || "https://placehold.co/40"}
+                alt=""
+                className="mt-0.5 h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-border"
+              />
+              <div className="flex-1 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Link {index + 1}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeLink(index)}
+                    className="text-xs font-medium text-destructive underline underline-offset-4"
+                  >
+                    Remove
+                  </button>
+                </div>
+                <input
+                  placeholder="Name (e.g. Codeforces)"
+                  value={link.name}
+                  onChange={(e) => updateLink(index, { name: e.target.value })}
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                <input
+                  placeholder="Logo image URL"
+                  value={link.logoUrl}
+                  onChange={(e) =>
+                    updateLink(index, { logoUrl: e.target.value })
+                  }
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+                <input
+                  placeholder="Link URL"
+                  value={link.url}
+                  onChange={(e) => updateLink(index, { url: e.target.value })}
+                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
+            </div>
+          ))}
+
+          <input type="hidden" name="platformLinks" value={JSON.stringify(links)} />
         </div>
 
         {message && (

@@ -10,25 +10,27 @@ const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 5MB
 const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 const MAX_FEATURED_ITEMS = 6;
+const MAX_PLATFORM_LINKS = 8;
 
-function parseFeaturedItems(raw: FormDataEntryValue | null) {
+function parseJsonArray(raw: FormDataEntryValue | null): unknown[] {
   if (typeof raw !== "string") return [];
-  let parsed: unknown;
   try {
-    parsed = JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
-  if (!Array.isArray(parsed)) return [];
+}
 
-  return parsed
+function parseFeaturedItems(raw: FormDataEntryValue | null) {
+  return parseJsonArray(raw)
     .filter(
       (item): item is { title: string; description: string; url: string } =>
         typeof item === "object" &&
         item !== null &&
-        typeof item.title === "string" &&
-        typeof item.description === "string" &&
-        typeof item.url === "string",
+        typeof (item as Record<string, unknown>).title === "string" &&
+        typeof (item as Record<string, unknown>).description === "string" &&
+        typeof (item as Record<string, unknown>).url === "string",
     )
     .map((item) => ({
       title: item.title.trim(),
@@ -37,6 +39,25 @@ function parseFeaturedItems(raw: FormDataEntryValue | null) {
     }))
     .filter((item) => item.title.length > 0)
     .slice(0, MAX_FEATURED_ITEMS);
+}
+
+function parsePlatformLinks(raw: FormDataEntryValue | null) {
+  return parseJsonArray(raw)
+    .filter(
+      (item): item is { name: string; logoUrl: string; url: string } =>
+        typeof item === "object" &&
+        item !== null &&
+        typeof (item as Record<string, unknown>).name === "string" &&
+        typeof (item as Record<string, unknown>).logoUrl === "string" &&
+        typeof (item as Record<string, unknown>).url === "string",
+    )
+    .map((item) => ({
+      name: item.name.trim(),
+      logoUrl: item.logoUrl.trim(),
+      url: item.url.trim(),
+    }))
+    .filter((item) => item.name.length > 0 && item.url.length > 0)
+    .slice(0, MAX_PLATFORM_LINKS);
 }
 
 export async function updateProfile(_prevState: string | null, formData: FormData) {
@@ -52,6 +73,7 @@ export async function updateProfile(_prevState: string | null, formData: FormDat
     email: String(formData.get("email") ?? ""),
     socialLinks: {},
     featuredItems: parseFeaturedItems(formData.get("featuredItems")),
+    platformLinks: parsePlatformLinks(formData.get("platformLinks")),
   });
 
   revalidatePath("/");

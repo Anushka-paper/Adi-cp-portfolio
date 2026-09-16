@@ -12,6 +12,7 @@ export const DEFAULT_PROFILE_CONTENT = {
   email: "aditya@example.com",
   socialLinks: {} as Record<string, string>,
   featuredItems: [] as { title: string; description: string; url: string }[],
+  platformLinks: [] as { name: string; logoUrl: string; url: string }[],
 };
 
 export type ProfileContentData = typeof DEFAULT_PROFILE_CONTENT;
@@ -37,6 +38,7 @@ export async function getProfileContent(): Promise<ProfileContentData> {
       email: row.email ?? DEFAULT_PROFILE_CONTENT.email,
       socialLinks: row.socialLinks ?? {},
       featuredItems: row.featuredItems ?? [],
+      platformLinks: row.platformLinks ?? [],
     };
   } catch {
     return DEFAULT_PROFILE_CONTENT;

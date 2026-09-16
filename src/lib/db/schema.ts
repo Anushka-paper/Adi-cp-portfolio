@@ -27,6 +27,11 @@ export const profileContent = pgTable("profile_content", {
   featuredItems: jsonb("featured_items").$type<
     { title: string; description: string; url: string }[]
   >(),
+  // Circular logo icons linking out to each platform's profile —
+  // rendered as an AvatarGroup on the home page.
+  platformLinks: jsonb("platform_links").$type<
+    { name: string; logoUrl: string; url: string }[]
+  >(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull(),
 });
 

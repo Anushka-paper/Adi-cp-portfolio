@@ -13,6 +13,16 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  // Needed so the opengraph-image.tsx file convention (and any other
+  // relative URLs in metadata) resolve to an absolute, real URL
+  // instead of defaulting to http://localhost:3000 in share previews.
+  // VERCEL_PROJECT_PRODUCTION_URL is the stable production domain
+  // (unlike VERCEL_URL, which is a new value per-deployment).
+  metadataBase: new URL(
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
+      ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+      : "http://localhost:3000",
+  ),
   title: "CP Portfolio",
   description: "Competitive programming profile portfolio",
 };

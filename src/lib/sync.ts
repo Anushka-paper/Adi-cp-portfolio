@@ -71,10 +71,11 @@ export async function runSync(): Promise<SyncOutcome> {
     }
   }
 
-  // The home page is statically prerendered, so without this it would
-  // keep serving the build-time snapshot forever regardless of what
-  // just got written to the DB above.
+  // Both are statically prerendered, so without this they'd keep
+  // serving their build-time snapshot forever regardless of what just
+  // got written to the DB above.
   revalidatePath("/");
+  revalidatePath("/opengraph-image");
 
   return { syncedAt: new Date().toISOString(), results };
 }

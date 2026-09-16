@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Clock, Copy, Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { hexToRgba } from "@/lib/codeforces-rank-color";
 
 export interface ProfileCardProps {
   name?: string;
@@ -11,7 +12,9 @@ export interface ProfileCardProps {
   email?: string;
   avatarSrc?: string;
   statusText?: string;
-  statusColor?: string;
+  /** Hex color driving the glow slab and status dot — the design's
+   * single accent (see design.md §2.1). Defaults to the original lime. */
+  accentColor?: string;
   glowText?: string;
   onHireMe?: () => void;
   className?: string;
@@ -23,7 +26,7 @@ export function ProfileCard({
   email = "hello@example.com",
   avatarSrc = "https://i.pravatar.cc/112",
   statusText = "Available for work",
-  statusColor = "bg-lime-500",
+  accentColor = "#a3e635",
   glowText = "Currently High on Creativity",
   onHireMe,
   className,
@@ -54,8 +57,11 @@ export function ProfileCard({
     <div className={cn("relative w-full max-w-3xl", className)}>
       {/* Glow slab */}
       <div
-        className="absolute inset-x-6 top-[72%] -bottom-10 z-0 rounded-[28px] bg-lime-400/90"
-        style={{ boxShadow: "0 40px 80px -16px rgba(163, 230, 53, 0.8)" }}
+        className="absolute inset-x-6 top-[72%] -bottom-10 z-0 rounded-[28px]"
+        style={{
+          backgroundColor: hexToRgba(accentColor, 0.9),
+          boxShadow: `0 40px 80px -16px ${hexToRgba(accentColor, 0.8)}`,
+        }}
         aria-hidden
       >
         <div className="flex h-full items-end justify-center pb-4">
@@ -78,10 +84,8 @@ export function ProfileCard({
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span
-              className={cn(
-                "h-2.5 w-2.5 rounded-full animate-pulse",
-                statusColor,
-              )}
+              className="h-2.5 w-2.5 rounded-full animate-pulse"
+              style={{ backgroundColor: accentColor }}
             />
             <span className="select-none text-sm text-neutral-300">
               {statusText}

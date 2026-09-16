@@ -16,7 +16,10 @@ export interface ProfileCardProps {
    * single accent (see design.md §2.1). Defaults to the original lime. */
   accentColor?: string;
   glowText?: string;
-  onHireMe?: () => void;
+  /** Text and destination for the card's first action button — was a
+   * hardcoded "Hire Me" with no link. */
+  ctaText?: string;
+  ctaUrl?: string;
   className?: string;
 }
 
@@ -28,7 +31,8 @@ export function ProfileCard({
   statusText = "Available for work",
   accentColor = "#a3e635",
   glowText = "Currently High on Creativity",
-  onHireMe,
+  ctaText = "Hire Me",
+  ctaUrl = "",
   className,
 }: ProfileCardProps) {
   const [copied, setCopied] = useState(false);
@@ -132,14 +136,24 @@ export function ProfileCard({
 
         {/* Action row */}
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <button
-            type="button"
-            onClick={onHireMe}
-            className="flex h-12 items-center justify-start gap-2 rounded-2xl bg-white/10 px-4 text-sm font-medium text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <Plus className="h-4 w-4" />
-            Hire Me
-          </button>
+          {ctaUrl ? (
+            <a
+              href={ctaUrl}
+              target="_blank"
+              rel="noopener"
+              className="flex h-12 items-center justify-start gap-2 rounded-2xl bg-white/10 px-4 text-sm font-medium text-white transition-colors hover:bg-white/15 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Plus className="h-4 w-4" />
+              {ctaText}
+            </a>
+          ) : (
+            // No link configured yet (via /admin) — same look, not
+            // interactive, so the layout doesn't shift once one is set.
+            <span className="flex h-12 items-center justify-start gap-2 rounded-2xl bg-white/10 px-4 text-sm font-medium text-white/60">
+              <Plus className="h-4 w-4" />
+              {ctaText}
+            </span>
+          )}
           <button
             type="button"
             onClick={handleCopy}

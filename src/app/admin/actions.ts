@@ -72,6 +72,8 @@ export async function updateProfile(_prevState: string | null, formData: FormDat
     bio: String(formData.get("bio") ?? "") || null,
     avatarUrl: String(formData.get("avatarUrl") ?? ""),
     email: String(formData.get("email") ?? ""),
+    ctaText: String(formData.get("ctaText") ?? "") || "Hire Me",
+    ctaUrl: String(formData.get("ctaUrl") ?? ""),
     socialLinks: {},
     featuredItems: parseFeaturedItems(formData.get("featuredItems")),
     platformLinks: parsePlatformLinks(formData.get("platformLinks")),

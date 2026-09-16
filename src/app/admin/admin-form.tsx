@@ -4,13 +4,15 @@ import { useActionState, useState } from "react";
 import type { ProfileContentData } from "@/lib/profile-content";
 import { updateProfile, uploadAvatar, resyncNow, logout } from "./actions";
 
-type TextField = "name" | "role" | "bio" | "email";
+type TextField = "name" | "role" | "bio" | "email" | "ctaText" | "ctaUrl";
 
 const fields: { name: TextField; label: string; type?: string }[] = [
   { name: "name", label: "Name" },
   { name: "role", label: "Role" },
   { name: "bio", label: "Bio" },
   { name: "email", label: "Email" },
+  { name: "ctaText", label: "First button text (e.g. \"Hire Me\")" },
+  { name: "ctaUrl", label: "First button link" },
 ];
 
 type FeaturedItem = { title: string; description: string; url: string };

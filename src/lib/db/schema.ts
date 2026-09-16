@@ -23,6 +23,10 @@ export const profileContent = pgTable("profile_content", {
   bio: text("bio"),
   avatarUrl: text("avatar_url"),
   email: text("email"),
+  // The profile card's first action button — was a hardcoded "Hire
+  // Me" with no destination.
+  ctaText: text("cta_text"),
+  ctaUrl: text("cta_url"),
   socialLinks: jsonb("social_links").$type<Record<string, string>>(),
   featuredItems: jsonb("featured_items").$type<
     { title: string; description: string; url: string }[]

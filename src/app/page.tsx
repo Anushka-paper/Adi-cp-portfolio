@@ -42,6 +42,8 @@ export default async function Home() {
         statusText="Grinding rating"
         accentColor={accentColor}
         glowText={glowText}
+        ctaText={content.ctaText}
+        ctaUrl={content.ctaUrl}
       />
 
       {/* Only one of these two gets the glow-clearance top margin —

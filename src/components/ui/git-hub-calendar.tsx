@@ -94,7 +94,7 @@ export function GitHubCalendar({
     return months;
   }
 
-  const dayLabels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const dayLabels = ["S", "M", "T", "W", "T", "F", "S"];
 
   return (
     <div className="rounded-lg border p-4">

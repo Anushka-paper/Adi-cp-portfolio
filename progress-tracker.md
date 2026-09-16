@@ -36,7 +36,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] CSES — no per-user public API or profile endpoint exists at all; not syncable the way CF/LC/AtCoder are. Would need a manual/curated value instead of a real adapter.
 - [ ] ICPC — not a personal-rating platform (team/regional contest results, no user API); would need a manually-curated "achievement" entry rather than a sync adapter.
 - [ ] Solved-by-tag / solved-by-difficulty breakdowns
-- [ ] Admin "resync now" action
+- [x] Admin "resync now" action — sync logic extracted from `/api/sync` into a shared `runSync()` (`src/lib/sync.ts`) so the admin action calls it directly instead of making an internal HTTP round-trip; button in `/admin` shows a per-platform ok/failed summary. Bridges the daily-cron staleness gap from Phase 1's Notes. Verified live: synced all three platforms on demand with real handles.
 - [x] On-demand revalidation — `revalidatePath("/")` after every sync (was previously a no-op `revalidateTag` call that tagged nothing; see Notes)
 - [x] Avatar upload via Vercel Blob — `/admin` now has a file upload (PNG/JPEG/WebP/GIF, 5MB max) alongside the URL field, saved via `@vercel/blob`'s `put()`. **Needs a Vercel Blob store created + `BLOB_READ_WRITE_TOKEN` set before this works in production** — not done yet, see Notes.
 

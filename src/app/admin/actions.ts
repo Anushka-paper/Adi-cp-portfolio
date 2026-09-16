@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { destroySession, hasValidSession } from "@/lib/admin-auth";
 import { getProfileContent, saveProfileContent } from "@/lib/profile-content";
+import { runSync } from "@/lib/sync";
 
 const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 5MB
 const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
@@ -115,6 +116,26 @@ export async function uploadAvatar(_prevState: string | null, formData: FormData
   revalidatePath("/");
   revalidatePath("/admin");
   return url;
+}
+
+export async function resyncNow() {
+  if (!(await hasValidSession())) {
+    redirect("/admin/login");
+  }
+
+  try {
+    const outcome = await runSync();
+    const summary = outcome.results
+      .map((r) => `${r.platform}: ${r.status}`)
+      .join(", ");
+    revalidatePath("/admin");
+    return summary
+      ? `Synced at ${new Date(outcome.syncedAt).toLocaleTimeString()} — ${summary}`
+      : "No platform handles configured — nothing to sync.";
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return `Sync failed: ${message}`;
+  }
 }
 
 export async function logout() {

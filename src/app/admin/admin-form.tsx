@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { ProfileContentData } from "@/lib/profile-content";
-import { updateProfile, uploadAvatar, logout } from "./actions";
+import { updateProfile, uploadAvatar, resyncNow, logout } from "./actions";
 
 type TextField = "name" | "role" | "bio" | "email";
 
@@ -67,6 +67,28 @@ function AvatarUploader({ initialUrl }: { initialUrl: string }) {
   );
 }
 
+function ResyncButton() {
+  const [result, action, pending] = useActionState(resyncNow, null);
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border p-3">
+      <form action={action}>
+        <button
+          type="submit"
+          disabled={pending}
+          className="shrink-0 rounded-lg bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground disabled:opacity-60"
+        >
+          {pending ? "Syncing..." : "Resync now"}
+        </button>
+      </form>
+      <p className="text-xs text-muted-foreground">
+        {result ??
+          "Pulls fresh data from Codeforces/LeetCode/AtCoder right now, instead of waiting for the daily cron."}
+      </p>
+    </div>
+  );
+}
+
 export function AdminForm({ content }: { content: ProfileContentData }) {
   const [message, formAction, pending] = useActionState(updateProfile, null);
   const [items, setItems] = useState<FeaturedItem[]>(content.featuredItems);
@@ -94,6 +116,7 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
 
   return (
     <div className="space-y-6">
+      <ResyncButton />
       <AvatarUploader initialUrl={content.avatarUrl} />
 
       <form id="profile-form" action={formAction} className="space-y-8">

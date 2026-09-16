@@ -26,7 +26,14 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const db = getDb();
+  let db: ReturnType<typeof getDb>;
+  try {
+    db = getDb();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `DB setup failed: ${message}` }, { status: 500 });
+  }
+
   const results: SyncResult[] = [];
 
   for (const [platform, adapter] of Object.entries(adapters) as [
@@ -63,15 +70,24 @@ export async function GET(request: Request) {
       const message = err instanceof Error ? err.message : String(err);
       // Last-good data stays in place; only the status/error columns
       // are updated so the UI can show "stale" instead of erroring.
-      await db
-        .update(platformSnapshots)
-        .set({ status: "failed", error: message })
-        .where(eq(platformSnapshots.platform, platform));
+      try {
+        await db
+          .update(platformSnapshots)
+          .set({ status: "failed", error: message })
+          .where(eq(platformSnapshots.platform, platform));
+      } catch {
+        // DB itself may be unreachable — the result below still
+        // reports the original failure either way.
+      }
       results.push({ platform, status: "failed", profile: null, error: message });
     }
   }
 
-  revalidateTag("platform-snapshots", "max");
+  try {
+    revalidateTag("platform-snapshots", "max");
+  } catch {
+    // no-op outside a caching context (e.g. hit directly, not via cron)
+  }
 
   return NextResponse.json({ syncedAt: new Date().toISOString(), results });
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Clock, Copy, Plus, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,14 +34,27 @@ export function ProfileCard({
   const [copied, setCopied] = useState(false);
   const prefersReducedMotion = useReducedMotion();
 
-  const timeText = useMemo(
-    () =>
-      new Date().toLocaleTimeString([], {
-        hour: "numeric",
-        minute: "2-digit",
-      }),
-    [],
-  );
+  // null on the server and until the first client effect runs, so the
+  // initial client render matches the server's HTML exactly (avoids a
+  // hydration mismatch). The home page is statically prerendered, so
+  // the server's clock is frozen at build time — computing this
+  // eagerly during render would mismatch the client's real time on
+  // essentially every page load, not just occasionally.
+  const [timeText, setTimeText] = useState<string | null>(null);
+
+  useEffect(() => {
+    function update() {
+      setTimeText(
+        new Date().toLocaleTimeString([], {
+          hour: "numeric",
+          minute: "2-digit",
+        }),
+      );
+    }
+    update();
+    const id = setInterval(update, 30_000);
+    return () => clearInterval(id);
+  }, []);
 
   async function handleCopy() {
     try {
@@ -94,7 +107,7 @@ export function ProfileCard({
           <div className="flex items-center gap-2">
             <Clock className="h-4 w-4 text-neutral-300" />
             <span className="tabular-nums text-sm text-neutral-300">
-              {timeText}
+              {timeText ?? "--:--"}
             </span>
           </div>
         </div>

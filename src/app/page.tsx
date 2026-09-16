@@ -44,8 +44,11 @@ export default async function Home() {
       />
 
       {/* Single column on mobile, 2 cols on tablet, a 12-col bento grid
-          on desktop so tiles vary in size instead of stacking. */}
-      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
+          on desktop so tiles vary in size instead of stacking. Extra
+          top margin clears the profile card's glow, which visually
+          extends below the card itself (see profile-card.tsx's
+          -bottom-10 glow slab) further than the flex gap accounts for. */}
+      <div className="mt-10 grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
         <Card className="sm:col-span-2 lg:col-span-7">
           <CardHeader>
             {/* Not CardTitle — it renders a <div>, not a heading, and

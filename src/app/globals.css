@@ -166,3 +166,23 @@
     @apply font-sans;
   }
 }
+
+/* Thin, theme-colored scrollbar for the chart/heatmap horizontal
+   scroll containers, instead of the native OS default. */
+.scrollbar-themed {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.scrollbar-themed::-webkit-scrollbar {
+  height: 8px;
+}
+.scrollbar-themed::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 9999px;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb:hover {
+  background-color: var(--muted-foreground);
+}

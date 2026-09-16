@@ -68,7 +68,7 @@ export function RatingChart({ snapshots }: { snapshots: PlatformSnapshot[] }) {
     <div role="img" aria-label="Unified rating timeline across platforms">
       {/* min-width keeps the legend/axis labels from clipping on very
           narrow screens — scrolls instead of cutting off text. */}
-      <div className="overflow-x-auto">
+      <div className="scrollbar-themed overflow-x-auto overflow-y-hidden">
         <AreaChart
           className="min-w-105"
           data={data as Record<string, string | number>[]}

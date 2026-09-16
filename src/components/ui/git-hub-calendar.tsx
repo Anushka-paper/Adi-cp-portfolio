@@ -98,7 +98,11 @@ export function GitHubCalendar({
 
   return (
     <div className="rounded-lg border p-4">
-      <div className="flex overflow-x-auto">
+      {/* overflow-x-auto alone implicitly sets overflow-y to auto too
+          (per the CSS Overflow spec), which spawns a vertical
+          scrollbar from a few px of sub-pixel text-line overflow in
+          the day labels — overflow-y-hidden here is deliberate. */}
+      <div className="scrollbar-themed flex overflow-x-auto overflow-y-hidden pb-2">
         <div className="mr-2 mt-5.5 flex flex-col justify-between">
           {dayLabels.map((day) => (
             <span key={day} className="h-3 text-xs text-muted-foreground">

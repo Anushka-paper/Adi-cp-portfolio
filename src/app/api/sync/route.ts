@@ -11,6 +11,7 @@ export const dynamic = "force-dynamic";
 const HANDLES: Partial<Record<Platform, string>> = {
   codeforces: process.env.CODEFORCES_HANDLE,
   leetcode: process.env.LEETCODE_HANDLE,
+  atcoder: process.env.ATCODER_HANDLE,
 };
 
 // Triggered by Vercel Cron every 6h (see vercel.json) or manually via

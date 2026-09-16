@@ -1,3 +1,4 @@
+import { atcoderAdapter } from "./atcoder";
 import { codeforcesAdapter } from "./codeforces";
 import { leetcodeAdapter } from "./leetcode";
 import type { Platform, PlatformAdapter } from "./types";
@@ -5,8 +6,8 @@ import type { Platform, PlatformAdapter } from "./types";
 export const adapters: Record<Platform, PlatformAdapter | null> = {
   codeforces: codeforcesAdapter,
   leetcode: leetcodeAdapter,
-  atcoder: null, // planned for v1.1 — see PRD §5
-  codechef: null, // planned for v1.1 — see PRD §5
+  atcoder: atcoderAdapter,
+  codechef: null, // no public API — see progress-tracker.md for the plan
 };
 
 export * from "./types";

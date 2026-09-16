@@ -40,7 +40,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] On-demand revalidation
 
 ## Phase 1.2
-- [ ] Featured/pinned items (up to 6)
+- [x] Featured/pinned items (up to 6) — pulled forward from v1.2 to cover CodeChef/CSES/ICPC, which have no live-sync path (see Phase 1.1 notes). Editable via `/admin` (title/description/link), rendered as an "Achievements" section. Verified end-to-end with Playwright (add → save → renders on home page).
 - [ ] GitHub contributions panel
 - [ ] OG image generation
 - [ ] Theme polish (dark/light)

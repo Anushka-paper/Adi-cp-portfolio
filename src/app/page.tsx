@@ -2,6 +2,7 @@ import { ProfileCard } from "@/components/profile-card";
 import { PlatformCard } from "@/components/platform-card";
 import { RatingChart } from "@/components/rating-chart";
 import { ActivityHeatmap } from "@/components/activity-heatmap";
+import { AchievementCard } from "@/components/achievement-card";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getSnapshots } from "@/lib/get-snapshots";
 import { getProfileContent } from "@/lib/profile-content";
@@ -67,6 +68,19 @@ export default async function Home() {
           ))
         )}
       </section>
+
+      {content.featuredItems.length > 0 && (
+        <section className="w-full space-y-4">
+          <h2 className="text-lg font-semibold tracking-tight">
+            Achievements
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {content.featuredItems.map((item) => (
+              <AchievementCard key={item.title} {...item} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

@@ -1,9 +1,13 @@
 "use server";
 
+import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { destroySession, hasValidSession } from "@/lib/admin-auth";
-import { saveProfileContent } from "@/lib/profile-content";
+import { getProfileContent, saveProfileContent } from "@/lib/profile-content";
+
+const MAX_AVATAR_BYTES = 5 * 1024 * 1024; // 5MB
+const ALLOWED_AVATAR_TYPES = ["image/png", "image/jpeg", "image/webp", "image/gif"];
 
 const MAX_FEATURED_ITEMS = 6;
 
@@ -53,6 +57,42 @@ export async function updateProfile(_prevState: string | null, formData: FormDat
   revalidatePath("/");
   revalidatePath("/admin");
   return "Saved.";
+}
+
+export async function uploadAvatar(_prevState: string | null, formData: FormData) {
+  if (!(await hasValidSession())) {
+    redirect("/admin/login");
+  }
+
+  const file = formData.get("avatarFile");
+  if (!(file instanceof File) || file.size === 0) {
+    return "No file selected.";
+  }
+  if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
+    return "Unsupported file type — use PNG, JPEG, WebP, or GIF.";
+  }
+  if (file.size > MAX_AVATAR_BYTES) {
+    return "File too large — 5MB max.";
+  }
+
+  let url: string;
+  try {
+    const blob = await put(`avatars/${Date.now()}-${file.name}`, file, {
+      access: "public",
+      addRandomSuffix: true,
+    });
+    url = blob.url;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return `Upload failed: ${message}`;
+  }
+
+  const current = await getProfileContent();
+  await saveProfileContent({ ...current, avatarUrl: url });
+
+  revalidatePath("/");
+  revalidatePath("/admin");
+  return url;
 }
 
 export async function logout() {

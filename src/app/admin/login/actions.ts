@@ -10,6 +10,12 @@ export async function login(_prevState: string | null, formData: FormData) {
     return "Incorrect password.";
   }
 
-  await createSession();
+  try {
+    await createSession();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return `Login succeeded but session creation failed: ${message}`;
+  }
+
   redirect("/admin");
 }

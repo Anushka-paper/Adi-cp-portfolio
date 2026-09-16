@@ -2,21 +2,66 @@
 
 import { useActionState, useState } from "react";
 import type { ProfileContentData } from "@/lib/profile-content";
-import { updateProfile, logout } from "./actions";
+import { updateProfile, uploadAvatar, logout } from "./actions";
 
-type TextField = "name" | "role" | "bio" | "avatarUrl" | "email";
+type TextField = "name" | "role" | "bio" | "email";
 
 const fields: { name: TextField; label: string; type?: string }[] = [
   { name: "name", label: "Name" },
   { name: "role", label: "Role" },
   { name: "bio", label: "Bio" },
-  { name: "avatarUrl", label: "Avatar URL" },
   { name: "email", label: "Email" },
 ];
 
 type FeaturedItem = { title: string; description: string; url: string };
 const MAX_FEATURED_ITEMS = 6;
 const EMPTY_ITEM: FeaturedItem = { title: "", description: "", url: "" };
+
+function AvatarUploader({ initialUrl }: { initialUrl: string }) {
+  const [result, formAction, pending] = useActionState(uploadAvatar, null);
+  const [avatarUrl, setAvatarUrl] = useState(initialUrl);
+
+  const isSuccess = result != null && result.startsWith("http");
+  if (isSuccess && result !== avatarUrl) {
+    setAvatarUrl(result);
+  }
+
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium">Avatar</label>
+      <div className="flex items-center gap-4">
+        {/* eslint-disable-next-line @next/next/no-img-element -- preview of an arbitrary uploaded/pasted URL */}
+        <img
+          src={avatarUrl}
+          alt=""
+          className="h-14 w-14 rounded-full object-cover ring-1 ring-border"
+        />
+        <form action={formAction} className="flex flex-1 items-center gap-2">
+          <input
+            type="file"
+            name="avatarFile"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            className="flex-1 text-sm"
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            className="shrink-0 rounded-lg bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground disabled:opacity-60"
+          >
+            {pending ? "Uploading..." : "Upload"}
+          </button>
+        </form>
+      </div>
+      {result && !isSuccess && (
+        <p role="alert" className="text-sm text-destructive">
+          {result}
+        </p>
+      )}
+      {isSuccess && <p className="text-xs text-muted-foreground">Uploaded and saved.</p>}
+      <input type="hidden" name="avatarUrl" value={avatarUrl} form="profile-form" />
+    </div>
+  );
+}
 
 export function AdminForm({ content }: { content: ProfileContentData }) {
   const [message, formAction, pending] = useActionState(updateProfile, null);
@@ -34,7 +79,9 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
 
   return (
     <div className="space-y-6">
-      <form action={formAction} className="space-y-8">
+      <AvatarUploader initialUrl={content.avatarUrl} />
+
+      <form id="profile-form" action={formAction} className="space-y-8">
         <div className="space-y-4">
           {fields.map((field) => (
             <div key={field.name} className="space-y-2">

@@ -1,5 +1,5 @@
 import { eq } from "drizzle-orm";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getDb } from "@/lib/db";
 import { platformSnapshots } from "@/lib/db/schema";
@@ -83,11 +83,10 @@ export async function GET(request: Request) {
     }
   }
 
-  try {
-    revalidateTag("platform-snapshots", "max");
-  } catch {
-    // no-op outside a caching context (e.g. hit directly, not via cron)
-  }
+  // The home page is statically prerendered, so without this it would
+  // keep serving the build-time snapshot forever regardless of what
+  // just got written to the DB above.
+  revalidatePath("/");
 
   return NextResponse.json({ syncedAt: new Date().toISOString(), results });
 }

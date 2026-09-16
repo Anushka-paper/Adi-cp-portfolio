@@ -1,5 +1,6 @@
 "use client";
 
+import { XAxis } from "@subframe/core";
 import { AreaChart } from "@/components/ui/area-chart";
 import type { PlatformSnapshot } from "@/lib/db/schema";
 
@@ -74,7 +75,18 @@ export function RatingChart({ snapshots }: { snapshots: PlatformSnapshot[] }) {
         index="date"
         categories={platforms}
         colors={platforms.map((p) => SERIES_COLORS[p] ?? "#888")}
-        xAxis={null}
+        // hide (not xAxis={null}) — Recharts still needs a real axis
+        // element wired to dataKey="date" to label the tooltip
+        // correctly; removing it entirely left the tooltip falling
+        // back to the data point's raw array index (e.g. "46").
+        xAxis={<XAxis dataKey="date" hide />}
+        // Hides the gradient fill via CSS (line-only look) rather than
+        // overriding AreaChart's default Area children with our own —
+        // this component's Area/XAxis are tied to a specific bundled
+        // Recharts instance internally, and swapping in Area from our
+        // own top-level "recharts" install (a different version) broke
+        // Recharts' internal child-type checks with a runtime crash.
+        className="[&_.recharts-area-area]:hidden"
       />
       {/* Text fallback for accessibility / no-JS (PRD Story 5). The
           sr-only class must go on a block-level wrapper, not the

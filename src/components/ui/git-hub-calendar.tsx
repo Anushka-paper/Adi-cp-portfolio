@@ -28,7 +28,11 @@ interface TooltipState {
   text: string;
 }
 
-const DEFAULT_COLORS = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
+// First entry (no activity) uses the app's own --muted token instead
+// of a hardcoded light gray — resolves to light gray in light mode
+// and dark gray in dark mode automatically, instead of a stark white
+// square against the dark card background.
+const DEFAULT_COLORS = ["var(--muted)", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
 
 export function GitHubCalendar({
   data,

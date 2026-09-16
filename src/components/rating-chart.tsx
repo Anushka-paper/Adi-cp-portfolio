@@ -66,17 +66,16 @@ export function RatingChart({ snapshots }: { snapshots: PlatformSnapshot[] }) {
 
   return (
     <div className="w-full min-w-0" role="img" aria-label="Unified rating timeline across platforms">
-      {/* min-width keeps the legend/axis labels from clipping on very
-          narrow screens — scrolls instead of cutting off text. */}
-      <div className="scrollbar-themed overflow-x-auto overflow-y-hidden">
-        <AreaChart
-          className="min-w-105"
-          data={data as Record<string, string | number>[]}
-          index="date"
-          categories={platforms}
-          colors={platforms.map((p) => SERIES_COLORS[p] ?? "#888")}
-        />
-      </div>
+      {/* No x-axis labels anymore, so nothing needs a fixed min-width —
+          the chart just shrinks to fit the available width instead of
+          scrolling, even as more rating history accumulates over time. */}
+      <AreaChart
+        data={data as Record<string, string | number>[]}
+        index="date"
+        categories={platforms}
+        colors={platforms.map((p) => SERIES_COLORS[p] ?? "#888")}
+        xAxis={null}
+      />
       {/* Text fallback for accessibility / no-JS (PRD Story 5). The
           sr-only class must go on a block-level wrapper, not the
           <table> itself — table auto-layout sizing overrides the

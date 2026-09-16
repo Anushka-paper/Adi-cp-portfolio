@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   format,
   subDays,
@@ -17,8 +18,14 @@ interface ContributionDay {
 interface GitHubCalendarProps {
   data: ContributionDay[];
   colors?: string[]; // custom color scale (default: GitHub-like greens)
-  /** Override the hover title text for a day; defaults to "N contributions". */
+  /** Override the hover tooltip text for a day; defaults to "N contributions". */
   renderTooltip?: (day: ContributionDay) => string;
+}
+
+interface TooltipState {
+  x: number;
+  y: number;
+  text: string;
 }
 
 const DEFAULT_COLORS = ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"];
@@ -28,6 +35,7 @@ export function GitHubCalendar({
   colors = DEFAULT_COLORS,
   renderTooltip,
 }: GitHubCalendarProps) {
+  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
   const today = new Date();
   const startDate = subDays(today, 364); // one year back
   const weeks = 53;
@@ -57,7 +65,7 @@ export function GitHubCalendar({
           {weekDays.map((day, index) => {
             const key = format(day, "yyyy-MM-dd");
             const contribution = byDate.get(key) ?? { date: key, count: 0 };
-            const title = renderTooltip
+            const text = renderTooltip
               ? renderTooltip(contribution)
               : `${format(day, "PPP")}: ${contribution.count} contribution${
                   contribution.count === 1 ? "" : "s"
@@ -66,9 +74,14 @@ export function GitHubCalendar({
             return (
               <div
                 key={index}
-                className="h-3 w-3 rounded-lg"
+                className="h-3 w-3 rounded-lg transition-transform hover:scale-125"
                 style={{ backgroundColor: getColor(contribution.count) }}
-                title={title}
+                aria-label={text}
+                onMouseEnter={(e) => {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setTooltip({ x: rect.left + rect.width / 2, y: rect.top, text });
+                }}
+                onMouseLeave={() => setTooltip(null)}
               />
             );
           })}
@@ -101,11 +114,15 @@ export function GitHubCalendar({
       {/* overflow-x-auto alone implicitly sets overflow-y to auto too
           (per the CSS Overflow spec), which spawns a vertical
           scrollbar from a few px of sub-pixel text-line overflow in
-          the day labels — overflow-y-hidden here is deliberate. */}
+          the day labels — overflow-y-hidden here is deliberate. This
+          also means anything overflowing vertically (like a hover
+          tooltip positioned above a cell) would get clipped, so the
+          tooltip below is rendered as position:fixed instead, which
+          escapes this container's overflow clipping entirely. */}
       <div className="scrollbar-themed flex overflow-x-auto overflow-y-hidden pb-2">
         <div className="mr-2 mt-5.5 flex shrink-0 flex-col justify-between">
-          {dayLabels.map((day) => (
-            <span key={day} className="h-3 text-xs text-muted-foreground">
+          {dayLabels.map((day, i) => (
+            <span key={i} className="h-3 text-xs text-muted-foreground">
               {day}
             </span>
           ))}
@@ -128,6 +145,17 @@ export function GitHubCalendar({
         ))}
         <span>More</span>
       </div>
+
+      {tooltip && (
+        <div
+          role="tooltip"
+          className="pointer-events-none fixed z-50 -translate-x-1/2 -translate-y-[calc(100%+8px)] rounded-md bg-foreground px-2 py-1 text-xs font-medium whitespace-nowrap text-background shadow-lg"
+          style={{ left: tooltip.x, top: tooltip.y }}
+        >
+          {tooltip.text}
+          <div className="absolute left-1/2 top-full h-0 w-0 -translate-x-1/2 border-4 border-transparent border-t-foreground" />
+        </div>
+      )}
     </div>
   );
 }

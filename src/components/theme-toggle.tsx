@@ -28,15 +28,49 @@ export function ThemeToggle() {
     applyTheme(resolveIsDark());
   }, []);
 
-  function toggle() {
+  function toggle(event: React.MouseEvent<HTMLButtonElement>) {
     const next = !resolveIsDark();
-    applyTheme(next);
-    try {
-      localStorage.setItem("theme", next ? "dark" : "light");
-    } catch {
-      // localStorage unavailable (private browsing, etc.) — the class
-      // still toggles for this page view, just won't persist.
+    const x = event.clientX;
+    const y = event.clientY;
+
+    function commit() {
+      applyTheme(next);
+      try {
+        localStorage.setItem("theme", next ? "dark" : "light");
+      } catch {
+        // localStorage unavailable (private browsing, etc.) — the class
+        // still toggles for this page view, just won't persist.
+      }
     }
+
+    if (
+      !document.startViewTransition ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      commit();
+      return;
+    }
+
+    const transition = document.startViewTransition(commit);
+    transition.ready.then(() => {
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y),
+      );
+      document.documentElement.animate(
+        {
+          clipPath: [
+            `circle(0px at ${x}px ${y}px)`,
+            `circle(${endRadius}px at ${x}px ${y}px)`,
+          ],
+        },
+        {
+          duration: 500,
+          easing: "ease-in-out",
+          pseudoElement: "::view-transition-new(root)",
+        },
+      );
+    });
   }
 
   return (

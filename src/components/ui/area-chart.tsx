@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as SubframeCore from "@subframe/core";
-import { useTheme } from "next-themes";
+import { useIsDark } from "@/lib/use-is-dark";
 
 const SubframeUtils = {
   twClassNames: SubframeCore.createTwClassNames([
@@ -62,10 +62,10 @@ const AreaChartRoot = React.forwardRef<
   }: AreaChartRootProps,
   ref,
 ) {
-  const { resolvedTheme } = useTheme();
   // Follows this app's own theme toggle instead of Subframe's default
   // (which forces dark styling regardless of the page theme).
-  const isDark = dark ?? resolvedTheme === "dark";
+  const detectedDark = useIsDark();
+  const isDark = dark ?? detectedDark;
 
   return (
     <SubframeCore.AreaChart

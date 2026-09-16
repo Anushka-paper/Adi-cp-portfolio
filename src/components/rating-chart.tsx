@@ -66,12 +66,17 @@ export function RatingChart({ snapshots }: { snapshots: PlatformSnapshot[] }) {
 
   return (
     <div role="img" aria-label="Unified rating timeline across platforms">
-      <AreaChart
-        data={data as Record<string, string | number>[]}
-        index="date"
-        categories={platforms}
-        colors={platforms.map((p) => SERIES_COLORS[p] ?? "#888")}
-      />
+      {/* min-width keeps the legend/axis labels from clipping on very
+          narrow screens — scrolls instead of cutting off text. */}
+      <div className="overflow-x-auto">
+        <AreaChart
+          className="min-w-105"
+          data={data as Record<string, string | number>[]}
+          index="date"
+          categories={platforms}
+          colors={platforms.map((p) => SERIES_COLORS[p] ?? "#888")}
+        />
+      </div>
       {/* Text fallback for accessibility / no-JS (PRD Story 5). The
           sr-only class must go on a block-level wrapper, not the
           <table> itself — table auto-layout sizing overrides the

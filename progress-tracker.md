@@ -26,7 +26,7 @@ Legend: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] Activity heatmap — now a GitHub-style calendar (`src/components/ui/git-hub-calendar.tsx`, `date-fns`-based) with per-platform tooltip breakdown and a text-table fallback
 - [x] Editable bio/avatar/social links (curated content, no redeploy needed) — `/admin` behind single-credential auth (signed HMAC cookie), server-action form, home page reads from DB with default fallback
 - [x] "Last synced" relative timestamp per platform
-- [x] Responsive layout 320px–1440px+ — verified via screenshots at both breakpoints, no horizontal overflow
+- [x] Responsive layout 320px–1440px+ — verified via screenshots at 320/768/1440px, no horizontal page overflow. Desktop (lg+) now uses a bento grid (12-col: rating chart 7/12, activity 5/12, platform/achievement cards 4/12 each = 3 per row) instead of a single vertical stack; tablet is 2-col, mobile is 1-col.
 - [x] Accessibility pass — `prefers-reduced-motion` gates the card entrance animation, `prefers-color-scheme` now drives the CSS token dark palette (was previously wired to an unused `.dark` class), shadcn primitives (Button/Card/Badge) provide focus-visible rings and keyboard nav for free, charts/heatmap have `sr-only` table fallbacks
 - [x] Deploy to Vercel — **live** at adi-cp-portfolio.vercel.app, connected to a Neon Postgres DB via Vercel's integration, real Codeforces + LeetCode data synced and rendering (handle: joyboy24)
 

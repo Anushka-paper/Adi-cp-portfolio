@@ -4,6 +4,7 @@ import { RatingChart } from "@/components/rating-chart";
 import { ActivityHeatmap } from "@/components/activity-heatmap";
 import { AchievementCard } from "@/components/achievement-card";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getSnapshots } from "@/lib/get-snapshots";
 import { getProfileContent } from "@/lib/profile-content";
 import { getNeonRankColor } from "@/lib/codeforces-rank-color";
@@ -27,7 +28,7 @@ export default async function Home() {
     : "Codeforces Expert";
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center gap-16 px-4 py-24">
+    <div className="mx-auto flex min-h-screen max-w-3xl flex-col items-center gap-8 px-4 py-16 sm:gap-12 sm:py-24 lg:max-w-6xl">
       <div className="fixed right-4 top-4 z-20">
         <ThemeToggle />
       </div>
@@ -42,45 +43,57 @@ export default async function Home() {
         glowText={glowText}
       />
 
-      <section className="w-full space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight">
-          Rating history
-        </h2>
-        <RatingChart snapshots={snapshots} />
-      </section>
+      {/* Single column on mobile, 2 cols on tablet, a 12-col bento grid
+          on desktop so tiles vary in size instead of stacking. */}
+      <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-12">
+        <Card className="sm:col-span-2 lg:col-span-7">
+          <CardHeader>
+            {/* Not CardTitle — it renders a <div>, not a heading, and
+                these are real page section headings. */}
+            <h2 className="text-base leading-none font-semibold">
+              Rating history
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <RatingChart snapshots={snapshots} />
+          </CardContent>
+        </Card>
 
-      <section className="w-full space-y-4">
-        <h2 className="text-lg font-semibold tracking-tight">
-          Activity
-        </h2>
-        <ActivityHeatmap snapshots={snapshots} />
-      </section>
+        <Card className="sm:col-span-2 lg:col-span-5">
+          <CardHeader>
+            <h2 className="text-base leading-none font-semibold">
+              Activity
+            </h2>
+          </CardHeader>
+          <CardContent>
+            <ActivityHeatmap snapshots={snapshots} />
+          </CardContent>
+        </Card>
 
-      <section className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2">
         {snapshots.length === 0 ? (
-          <p className="col-span-full text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-12">
             No synced platform data yet. Set DATABASE_URL and platform
             handles, then hit /api/sync to populate this page.
           </p>
         ) : (
           snapshots.map((snapshot) => (
-            <PlatformCard key={snapshot.platform} snapshot={snapshot} />
+            <div key={snapshot.platform} className="lg:col-span-4">
+              <PlatformCard snapshot={snapshot} />
+            </div>
           ))
         )}
-      </section>
 
-      {content.featuredItems.length > 0 && (
-        <section className="w-full space-y-4">
-          <h2 className="text-lg font-semibold tracking-tight">
+        {content.featuredItems.length > 0 && (
+          <h2 className="text-lg font-semibold tracking-tight sm:col-span-2 lg:col-span-12">
             Achievements
           </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {content.featuredItems.map((item) => (
-              <AchievementCard key={item.title} {...item} />
-            ))}
+        )}
+        {content.featuredItems.map((item) => (
+          <div key={item.title} className="lg:col-span-4">
+            <AchievementCard {...item} />
           </div>
-        </section>
-      )}
+        ))}
+      </div>
     </div>
   );
 }

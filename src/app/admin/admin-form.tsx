@@ -118,9 +118,9 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
 
       <form id="profile-form" action={formAction}>
         {/* Single column on mobile/tablet, two columns on desktop:
-            profile fields on the left, curated lists on the right —
-            instead of one long single-column stack regardless of
-            screen width. */}
+            profile fields + Achievements on the left, Platform Links
+            on the right — instead of one long single-column stack
+            regardless of screen width. */}
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -209,9 +209,7 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
             >
               {pending ? "Saving..." : "Save"}
             </button>
-          </div>
 
-          <div className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-medium">
@@ -274,7 +272,9 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
                 value={JSON.stringify(items)}
               />
             </div>
+          </div>
 
+          <div className="space-y-6">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-medium">

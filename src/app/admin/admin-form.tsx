@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useRef, useState } from "react";
 import type { ProfileContentData } from "@/lib/profile-content";
-import { updateProfile, uploadAvatar, resyncNow } from "./actions";
+import { updateProfile, uploadAvatar, resyncNow, logout } from "./actions";
 
 type FeaturedItem = { title: string; description: string; url: string };
 const MAX_FEATURED_ITEMS = 6;
@@ -15,22 +15,215 @@ const EMPTY_PLATFORM_LINK: PlatformLink = { name: "", logoUrl: "", url: "" };
 const inputClass =
   "w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
+// Crop editor: CONTAINER_SIZE is the on-screen preview circle (CSS px),
+// OUTPUT_SIZE is the resolution of the square PNG actually uploaded.
+const CROP_CONTAINER_SIZE = 220;
+const CROP_OUTPUT_SIZE = 512;
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function AvatarCropper({
+  imageSrc,
+  onCancel,
+  onSave,
+}: {
+  imageSrc: string;
+  onCancel: () => void;
+  onSave: (file: File) => void;
+}) {
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(
+    null,
+  );
+  const [zoom, setZoom] = useState(1);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const dragStart = useRef<{ x: number; y: number } | null>(null);
+
+  const baseScale = naturalSize
+    ? Math.max(
+        CROP_CONTAINER_SIZE / naturalSize.w,
+        CROP_CONTAINER_SIZE / naturalSize.h,
+      )
+    : 1;
+  const totalScale = baseScale * zoom;
+  const displayedWidth = (naturalSize?.w ?? CROP_CONTAINER_SIZE) * totalScale;
+  const displayedHeight = (naturalSize?.h ?? CROP_CONTAINER_SIZE) * totalScale;
+  const maxOffsetX = Math.max(0, (displayedWidth - CROP_CONTAINER_SIZE) / 2);
+  const maxOffsetY = Math.max(0, (displayedHeight - CROP_CONTAINER_SIZE) / 2);
+
+  function handlePointerDown(e: React.PointerEvent<HTMLDivElement>) {
+    e.currentTarget.setPointerCapture(e.pointerId);
+    dragStart.current = { x: e.clientX - offset.x, y: e.clientY - offset.y };
+  }
+
+  function handlePointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (!dragStart.current) return;
+    const nextX = e.clientX - dragStart.current.x;
+    const nextY = e.clientY - dragStart.current.y;
+    setOffset({
+      x: clamp(nextX, -maxOffsetX, maxOffsetX),
+      y: clamp(nextY, -maxOffsetY, maxOffsetY),
+    });
+  }
+
+  function handlePointerUp() {
+    dragStart.current = null;
+  }
+
+  function handleZoomChange(nextZoom: number) {
+    setZoom(nextZoom);
+    const nextTotalScale = baseScale * nextZoom;
+    const nextWidth = (naturalSize?.w ?? CROP_CONTAINER_SIZE) * nextTotalScale;
+    const nextHeight = (naturalSize?.h ?? CROP_CONTAINER_SIZE) * nextTotalScale;
+    const nextMaxX = Math.max(0, (nextWidth - CROP_CONTAINER_SIZE) / 2);
+    const nextMaxY = Math.max(0, (nextHeight - CROP_CONTAINER_SIZE) / 2);
+    setOffset((prev) => ({
+      x: clamp(prev.x, -nextMaxX, nextMaxX),
+      y: clamp(prev.y, -nextMaxY, nextMaxY),
+    }));
+  }
+
+  function handleSave() {
+    const img = imgRef.current;
+    if (!img || !naturalSize) return;
+
+    const srcSize = CROP_CONTAINER_SIZE / totalScale;
+    const srcX =
+      (displayedWidth / 2 - CROP_CONTAINER_SIZE / 2 - offset.x) / totalScale;
+    const srcY =
+      (displayedHeight / 2 - CROP_CONTAINER_SIZE / 2 - offset.y) / totalScale;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = CROP_OUTPUT_SIZE;
+    canvas.height = CROP_OUTPUT_SIZE;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.drawImage(
+      img,
+      srcX,
+      srcY,
+      srcSize,
+      srcSize,
+      0,
+      0,
+      CROP_OUTPUT_SIZE,
+      CROP_OUTPUT_SIZE,
+    );
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      onSave(new File([blob], "avatar.png", { type: "image/png" }));
+    }, "image/png");
+  }
+
+  return (
+    <div className="space-y-3 rounded-lg border bg-muted/40 p-3">
+      <div
+        className="relative mx-auto touch-none overflow-hidden rounded-full ring-1 ring-border"
+        style={{ width: CROP_CONTAINER_SIZE, height: CROP_CONTAINER_SIZE }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- drawn to canvas below, next/image can't back a canvas source cleanly */}
+        <img
+          ref={imgRef}
+          src={imageSrc}
+          alt=""
+          draggable={false}
+          onLoad={(e) =>
+            setNaturalSize({
+              w: e.currentTarget.naturalWidth,
+              h: e.currentTarget.naturalHeight,
+            })
+          }
+          className="absolute top-1/2 left-1/2 max-w-none cursor-move select-none"
+          style={{
+            width: displayedWidth,
+            height: displayedHeight,
+            transform: `translate(calc(-50% + ${offset.x}px), calc(-50% + ${offset.y}px))`,
+          }}
+        />
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-muted-foreground">Zoom</span>
+        <input
+          type="range"
+          min={1}
+          max={3}
+          step={0.01}
+          value={zoom}
+          onChange={(e) => handleZoomChange(Number(e.target.value))}
+          className="flex-1"
+        />
+      </div>
+      <p className="text-xs text-muted-foreground">Drag to reposition, then save the crop.</p>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={handleSave}
+          className="rounded-lg bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
+        >
+          Save crop
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-lg bg-secondary px-3 py-1.5 text-sm font-medium text-secondary-foreground"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function AvatarUploader({ initialUrl }: { initialUrl: string }) {
   const [result, formAction, pending] = useActionState(uploadAvatar, null);
   const [avatarUrl, setAvatarUrl] = useState(initialUrl);
+  const [pickerImageSrc, setPickerImageSrc] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const pickerInputRef = useRef<HTMLInputElement>(null);
+  const hiddenFileInputRef = useRef<HTMLInputElement>(null);
 
   const isSuccess = result != null && result.startsWith("http");
   if (isSuccess && result !== avatarUrl) {
     setAvatarUrl(result);
+    if (previewUrl) setPreviewUrl(null);
+  }
+
+  function handlePick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setPickerImageSrc(URL.createObjectURL(file));
+    e.target.value = "";
+  }
+
+  function handleCropSave(file: File) {
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    if (hiddenFileInputRef.current) {
+      hiddenFileInputRef.current.files = dt.files;
+    }
+    setPreviewUrl(URL.createObjectURL(file));
+    if (pickerImageSrc) URL.revokeObjectURL(pickerImageSrc);
+    setPickerImageSrc(null);
+  }
+
+  function handleCropCancel() {
+    if (pickerImageSrc) URL.revokeObjectURL(pickerImageSrc);
+    setPickerImageSrc(null);
   }
 
   return (
     <div className="space-y-2 rounded-lg border p-3">
       <label className="text-sm font-medium">Avatar</label>
       <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
-        {/* eslint-disable-next-line @next/next/no-img-element -- preview of an arbitrary uploaded/pasted URL */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- preview of an arbitrary uploaded/pasted or cropped URL */}
         <img
-          src={avatarUrl}
+          src={previewUrl ?? avatarUrl}
           alt=""
           className="h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-border"
         />
@@ -39,20 +232,39 @@ function AvatarUploader({ initialUrl }: { initialUrl: string }) {
           className="flex w-full flex-col gap-2 sm:flex-row sm:items-center"
         >
           <input
+            ref={pickerInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/gif"
+            onChange={handlePick}
+            className="min-w-0 flex-1 text-sm"
+          />
+          <input
+            ref={hiddenFileInputRef}
             type="file"
             name="avatarFile"
-            accept="image/png,image/jpeg,image/webp,image/gif"
-            className="min-w-0 flex-1 text-sm"
+            className="hidden"
           />
           <button
             type="submit"
-            disabled={pending}
+            disabled={pending || !previewUrl}
             className="shrink-0 rounded-lg bg-secondary px-3 py-2 text-sm font-medium text-secondary-foreground disabled:opacity-60"
           >
             {pending ? "Uploading..." : "Upload"}
           </button>
         </form>
       </div>
+      {pickerImageSrc && (
+        <AvatarCropper
+          imageSrc={pickerImageSrc}
+          onCancel={handleCropCancel}
+          onSave={handleCropSave}
+        />
+      )}
+      {!pickerImageSrc && !previewUrl && (
+        <p className="text-xs text-muted-foreground">
+          Choose an image to crop and resize it before uploading.
+        </p>
+      )}
       {result && !isSuccess && (
         <p role="alert" className="text-sm text-destructive">
           {result}
@@ -113,6 +325,38 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <h1 className="text-lg font-semibold">Edit profile content</h1>
+        <div className="flex shrink-0 items-center gap-4">
+          {message && (
+            <p role="status" className="hidden text-sm text-muted-foreground sm:block">
+              {message}
+            </p>
+          )}
+          <button
+            type="submit"
+            form="profile-form"
+            disabled={pending}
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          >
+            {pending ? "Saving..." : "Save"}
+          </button>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="text-sm font-medium underline underline-offset-4"
+            >
+              Sign out
+            </button>
+          </form>
+        </div>
+      </div>
+      {message && (
+        <p role="status" className="-mt-4 text-sm text-muted-foreground sm:hidden">
+          {message}
+        </p>
+      )}
+
       <ResyncButton />
       <AvatarUploader initialUrl={content.avatarUrl} />
 
@@ -196,19 +440,6 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
                 />
               </div>
             </div>
-
-            {message && (
-              <p role="status" className="text-sm text-muted-foreground">
-                {message}
-              </p>
-            )}
-            <button
-              type="submit"
-              disabled={pending}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
-            >
-              {pending ? "Saving..." : "Save"}
-            </button>
 
             <div className="space-y-4">
               <div className="flex items-center justify-between">

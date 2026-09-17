@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getProfileContent } from "@/lib/profile-content";
 import { getSnapshots } from "@/lib/get-snapshots";
-import { getNeonRankColor } from "@/lib/codeforces-rank-color";
+import { getPeakDisplay } from "@/lib/profile-display";
 
 // The `postgres` driver needs real Node sockets, not Edge-compatible —
 // same reason the rest of the DB layer never runs on the edge runtime.
@@ -10,10 +10,6 @@ export const runtime = "nodejs";
 export const alt = "CP Portfolio";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
-
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
 
 export default async function Image() {
   const [content, snapshots] = await Promise.all([
@@ -24,16 +20,14 @@ export default async function Image() {
   const codeforcesProfile = snapshots.find(
     (s) => s.platform === "codeforces",
   )?.data;
-  const accentColor = getNeonRankColor(codeforcesProfile?.currentRating);
-  const glowText = codeforcesProfile?.rank
-    ? `Codeforces ${capitalize(codeforcesProfile.rank)}`
-    : content.role;
+  const { accentColor, glowText } = getPeakDisplay(codeforcesProfile);
 
+  // Peak rating, matching the platform cards — not whatever it is today.
   const stats = snapshots
-    .filter((s) => s.data?.currentRating != null)
+    .filter((s) => (s.data?.maxRating ?? s.data?.currentRating) != null)
     .map((s) => ({
       label: s.platform,
-      rating: s.data!.currentRating,
+      rating: s.data!.maxRating ?? s.data!.currentRating,
     }));
 
   return new ImageResponse(
@@ -143,7 +137,7 @@ export default async function Image() {
               fontWeight: 600,
             }}
           >
-            {glowText}
+            {glowText ?? content.role}
           </div>
         </div>
       </div>

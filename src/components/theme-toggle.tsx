@@ -19,22 +19,6 @@ function applyTheme(isDark: boolean) {
   document.documentElement.classList.toggle("light", !isDark);
 }
 
-// Reads the real computed background color for a theme without ever
-// painting it: flips the class, reads, flips back — all synchronous,
-// so it never reaches the screen. Avoids hardcoding the --background
-// oklch values here in a second place (globals.css already owns them).
-function getBackgroundColorForTheme(isDark: boolean): string {
-  const root = document.documentElement;
-  const hadDark = root.classList.contains("dark");
-  const hadLight = root.classList.contains("light");
-  root.classList.toggle("dark", isDark);
-  root.classList.toggle("light", !isDark);
-  const color = getComputedStyle(document.body).backgroundColor;
-  root.classList.toggle("dark", hadDark);
-  root.classList.toggle("light", hadLight);
-  return color;
-}
-
 export function ThemeToggle() {
   // React's Strict Mode remounts once in dev, resetting <html> to only
   // the attributes/classes it manages from JSX — this re-applies
@@ -50,6 +34,7 @@ export function ThemeToggle() {
     if (animatingRef.current) return;
 
     const next = !resolveIsDark();
+    const root = document.documentElement;
 
     function commit() {
       applyTheme(next);
@@ -66,16 +51,29 @@ export function ThemeToggle() {
       return;
     }
 
-    // Direction-dependent single-phase ripple, rather than the previous
-    // View Transitions clip-path reveal (which animates a full-page
-    // screenshot and noticeably dropped frames on mobile — tall pages
-    // make for a large snapshot to clip-path every frame). This is a
-    // small `<div>` animated purely via `transform: scale(...)`, which
-    // the compositor can run smoothly without repainting the page:
-    // going dark GROWS a circle of the incoming dark color out from the
-    // click point (spread); going light SHRINKS a circle of the
-    // outgoing dark color back down to the click point (contract),
-    // uncovering the already-switched light page as it recedes.
+    // Direction-dependent ripple behind the page content (rather than
+    // the previous View Transitions clip-path reveal, which animates a
+    // full-page screenshot and noticeably dropped frames on mobile):
+    // going dark GROWS a circle of the new dark color out from the
+    // click point; going light SHRINKS a circle of the old dark color
+    // back down to the click point. The real theme now commits
+    // immediately in both cases — every component's own colors fade
+    // smoothly alongside the ripple via the `.theme-transitioning` CSS
+    // class (globals.css) instead of snapping instantly, which looked
+    // jarring once the ripple stopped painting over content.
+    const outgoingColor = getComputedStyle(document.body).backgroundColor;
+
+    // Adding the class and flipping the theme in the same tick would let
+    // the browser coalesce both into one style recalc, with no "before"
+    // frame to transition from — so nothing would actually animate.
+    // Reading a layout property forces a synchronous reflow in between,
+    // making sure `.theme-transitioning` is on record before the colors
+    // it's meant to animate actually change.
+    root.classList.add("theme-transitioning");
+    void root.offsetHeight;
+    commit();
+    const incomingColor = getComputedStyle(document.body).backgroundColor;
+
     const x = event.clientX;
     const y = event.clientY;
     const endRadius = Math.hypot(
@@ -98,45 +96,22 @@ export function ThemeToggle() {
     ripple.style.pointerEvents = "none";
     ripple.style.zIndex = "-1";
     ripple.style.willChange = "transform";
+    ripple.style.backgroundColor = next ? incomingColor : outgoingColor;
+    ripple.style.transform = next ? "scale(0)" : "scale(1)";
+    document.body.appendChild(ripple);
 
     animatingRef.current = true;
-
-    if (next) {
-      // Going dark: grow a dark circle from nothing, then commit once
-      // it fully covers the screen — the swap is invisible since the
-      // ripple already matches the real background at that instant.
-      ripple.style.backgroundColor = getBackgroundColorForTheme(true);
-      ripple.style.transform = "scale(0)";
-      document.body.appendChild(ripple);
-
-      const spread = ripple.animate(
-        [{ transform: "scale(0)" }, { transform: "scale(1)" }],
-        { duration: 420, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
-      );
-      spread.onfinish = () => {
-        commit();
-        ripple.remove();
-        animatingRef.current = false;
-      };
-    } else {
-      // Going light: commit immediately behind a circle already covering
-      // the screen in the outgoing dark color, then shrink that circle
-      // back down to the click point — revealing the real (now light)
-      // page underneath as it recedes.
-      ripple.style.backgroundColor = getComputedStyle(document.body).backgroundColor;
-      ripple.style.transform = "scale(1)";
-      document.body.appendChild(ripple);
-      commit();
-
-      const contract = ripple.animate(
-        [{ transform: "scale(1)" }, { transform: "scale(0)" }],
-        { duration: 420, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
-      );
-      contract.onfinish = () => {
-        ripple.remove();
-        animatingRef.current = false;
-      };
-    }
+    const anim = ripple.animate(
+      next
+        ? [{ transform: "scale(0)" }, { transform: "scale(1)" }]
+        : [{ transform: "scale(1)" }, { transform: "scale(0)" }],
+      { duration: 420, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
+    );
+    anim.onfinish = () => {
+      ripple.remove();
+      root.classList.remove("theme-transitioning");
+      animatingRef.current = false;
+    };
   }
 
   return (

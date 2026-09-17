@@ -157,20 +157,3 @@
 .scrollbar-themed::-webkit-scrollbar-thumb:hover {
   background-color: var(--foreground);
 }
-
-/* Circular reveal for the dark/light toggle (theme-toggle.tsx), via
-   the View Transitions API. Disable the browser's default cross-fade
-   so it doesn't fight with our clip-path circle animation, and lift
-   the new theme's snapshot above the old one so the growing circle
-   reveals it over a static background instead of both fading at once. */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-::view-transition-new(root) {
-  z-index: 9999;
-}
-::view-transition-old(root) {
-  z-index: 1;
-}

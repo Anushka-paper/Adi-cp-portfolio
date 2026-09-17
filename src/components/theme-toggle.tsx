@@ -84,6 +84,10 @@ export function ThemeToggle() {
     );
     const diameter = endRadius * 2;
 
+    // z-index: -1 keeps this behind every normal (non-positioned) page
+    // element — cards, buttons, text all stay fully visible throughout
+    // the animation instead of being covered by it. The ripple only
+    // shows up through the page's own background, not over content.
     const ripple = document.createElement("div");
     ripple.style.position = "fixed";
     ripple.style.left = `${x - endRadius}px`;
@@ -92,7 +96,7 @@ export function ThemeToggle() {
     ripple.style.height = `${diameter}px`;
     ripple.style.borderRadius = "9999px";
     ripple.style.pointerEvents = "none";
-    ripple.style.zIndex = "2147483647";
+    ripple.style.zIndex = "-1";
     ripple.style.willChange = "transform";
 
     animatingRef.current = true;

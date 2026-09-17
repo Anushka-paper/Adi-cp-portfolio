@@ -91,6 +91,7 @@ async function fetchProfile(handle: string): Promise<NormalizedProfile> {
     currentRating: userInfo.rating ?? null,
     maxRating: userInfo.maxRating ?? null,
     rank: userInfo.rank ?? null,
+    maxRank: userInfo.maxRank ?? null,
     ratingHistory,
     activityCalendar,
     solvedCount: solvedProblems.size,

@@ -122,6 +122,10 @@ async function fetchProfile(handle: string): Promise<NormalizedProfile> {
     rank: matchedUser.profile.ranking
       ? `Rank ${matchedUser.profile.ranking}`
       : null,
+    // LeetCode's "rank" is a numeric leaderboard position tied to
+    // current rating, not a tier — there's no separate "peak rank" to
+    // report the way CF/AtCoder have one.
+    maxRank: null,
     ratingHistory,
     activityCalendar,
     solvedCount: totalSolved ?? null,

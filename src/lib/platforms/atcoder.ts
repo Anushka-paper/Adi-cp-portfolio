@@ -81,6 +81,7 @@ async function fetchProfile(handle: string): Promise<NormalizedProfile> {
     currentRating,
     maxRating,
     rank: currentRating != null ? rankFor(currentRating) : null,
+    maxRank: maxRating != null ? rankFor(maxRating) : null,
     ratingHistory,
     activityCalendar,
     solvedCount: acRank?.count ?? null,

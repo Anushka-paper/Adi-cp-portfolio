@@ -33,18 +33,21 @@ export function PlatformCard({ snapshot }: { snapshot: PlatformSnapshot }) {
       <CardContent className="space-y-2">
         {profile ? (
           <>
+            {/* Peak rating/rank is the prominent number — current
+                rating is shown smaller below it, per feedback. */}
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-semibold tabular-nums">
-                {profile.currentRating ?? "—"}
+                {profile.maxRating ?? "—"}
               </span>
-              {profile.rank && (
+              {(profile.maxRank ?? profile.rank) && (
                 <span className="text-sm text-muted-foreground">
-                  {profile.rank}
+                  {profile.maxRank ?? profile.rank}
                 </span>
               )}
             </div>
             <p className="text-sm text-muted-foreground">
-              Max rating: {profile.maxRating ?? "—"}
+              Current: {profile.currentRating ?? "—"}
+              {profile.rank && ` (${profile.rank})`}
               {profile.solvedCount != null && ` · ${profile.solvedCount} solved`}
             </p>
             <a

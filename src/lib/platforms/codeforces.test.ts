@@ -73,6 +73,7 @@ describe("codeforcesAdapter", () => {
     expect(profile.currentRating).toBe(3301);
     expect(profile.maxRating).toBe(4009);
     expect(profile.rank).toBe("legendary grandmaster");
+    expect(profile.maxRank).toBe("tourist");
     expect(profile.ratingHistory).toHaveLength(1);
     expect(profile.solvedCount).toBe(1); // only the OK verdict counts
     expect(profile.activityCalendar).toHaveLength(1);

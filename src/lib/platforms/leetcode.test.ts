@@ -51,6 +51,7 @@ describe("leetcodeAdapter", () => {
     expect(profile.platform).toBe("leetcode");
     expect(profile.solvedCount).toBe(253);
     expect(profile.rank).toBe("Rank 634657");
+    expect(profile.maxRank).toBeNull(); // no tier concept on LeetCode
     expect(profile.ratingHistory).toHaveLength(1); // unattended contest excluded
     expect(profile.currentRating).toBe(3628);
     expect(profile.activityCalendar).toEqual([

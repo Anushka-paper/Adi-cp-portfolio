@@ -65,6 +65,28 @@ export default async function Home() {
           content.platformLinks.length === 0 ? "mt-10" : ""
         }`}
       >
+        {snapshots.length === 0 ? (
+          <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-12">
+            No synced platform data yet. Set DATABASE_URL and platform
+            handles, then hit /api/sync to populate this page.
+          </p>
+        ) : (
+          snapshots.map((snapshot) => (
+            <div key={snapshot.platform} className="lg:col-span-4">
+              <PlatformCard snapshot={snapshot} />
+            </div>
+          ))
+        )}
+
+        {/* No separate "Achievements" heading — these are styled
+            identically to the platform cards above and just extend
+            the same grid, rather than reading as a distinct section. */}
+        {content.featuredItems.map((item) => (
+          <div key={item.title} className="lg:col-span-4">
+            <AchievementCard {...item} />
+          </div>
+        ))}
+
         <Card className="sm:col-span-2 lg:col-span-12">
           <CardHeader>
             {/* Not CardTitle — it renders a <div>, not a heading, and
@@ -93,28 +115,6 @@ export default async function Home() {
             <ActivityHeatmap snapshots={snapshots} />
           </CardContent>
         </Card>
-
-        {snapshots.length === 0 ? (
-          <p className="text-sm text-muted-foreground sm:col-span-2 lg:col-span-12">
-            No synced platform data yet. Set DATABASE_URL and platform
-            handles, then hit /api/sync to populate this page.
-          </p>
-        ) : (
-          snapshots.map((snapshot) => (
-            <div key={snapshot.platform} className="lg:col-span-4">
-              <PlatformCard snapshot={snapshot} />
-            </div>
-          ))
-        )}
-
-        {/* No separate "Achievements" heading — these are styled
-            identically to the platform cards above and just extend
-            the same grid, rather than reading as a distinct section. */}
-        {content.featuredItems.map((item) => (
-          <div key={item.title} className="lg:col-span-4">
-            <AchievementCard {...item} />
-          </div>
-        ))}
       </div>
     </div>
   );

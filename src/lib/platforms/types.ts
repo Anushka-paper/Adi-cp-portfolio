@@ -19,6 +19,12 @@ export interface NormalizedProfile {
   currentRating: number | null;
   maxRating: number | null;
   rank: string | null;
+  /** Rank title at peak rating, when the source distinguishes it from
+   * the current rank (Codeforces; AtCoder derives it from maxRating
+   * via the same tier thresholds as `rank`). null where a platform
+   * has no such concept (LeetCode's "rank" is a numeric leaderboard
+   * position, not a tier). */
+  maxRank: string | null;
   ratingHistory: RatingPoint[];
   activityCalendar: ActivityDay[];
   solvedCount: number | null;

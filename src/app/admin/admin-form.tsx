@@ -2,18 +2,7 @@
 
 import { useActionState, useState } from "react";
 import type { ProfileContentData } from "@/lib/profile-content";
-import { updateProfile, uploadAvatar, resyncNow, logout } from "./actions";
-
-type TextField = "name" | "role" | "bio" | "email" | "ctaText" | "ctaUrl";
-
-const fields: { name: TextField; label: string; type?: string }[] = [
-  { name: "name", label: "Name" },
-  { name: "role", label: "Role" },
-  { name: "bio", label: "Bio" },
-  { name: "email", label: "Email" },
-  { name: "ctaText", label: "First button text (e.g. \"Hire Me\")" },
-  { name: "ctaUrl", label: "First button link" },
-];
+import { updateProfile, uploadAvatar, resyncNow } from "./actions";
 
 type FeaturedItem = { title: string; description: string; url: string };
 const MAX_FEATURED_ITEMS = 6;
@@ -22,6 +11,9 @@ const EMPTY_ITEM: FeaturedItem = { title: "", description: "", url: "" };
 type PlatformLink = { name: string; logoUrl: string; url: string };
 const MAX_PLATFORM_LINKS = 8;
 const EMPTY_PLATFORM_LINK: PlatformLink = { name: "", logoUrl: "", url: "" };
+
+const inputClass =
+  "w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring";
 
 function AvatarUploader({ initialUrl }: { initialUrl: string }) {
   const [result, formAction, pending] = useActionState(uploadAvatar, null);
@@ -33,21 +25,24 @@ function AvatarUploader({ initialUrl }: { initialUrl: string }) {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 rounded-lg border p-3">
       <label className="text-sm font-medium">Avatar</label>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center">
         {/* eslint-disable-next-line @next/next/no-img-element -- preview of an arbitrary uploaded/pasted URL */}
         <img
           src={avatarUrl}
           alt=""
-          className="h-14 w-14 rounded-full object-cover ring-1 ring-border"
+          className="h-14 w-14 shrink-0 rounded-full object-cover ring-1 ring-border"
         />
-        <form action={formAction} className="flex flex-1 items-center gap-2">
+        <form
+          action={formAction}
+          className="flex w-full flex-col gap-2 sm:flex-row sm:items-center"
+        >
           <input
             type="file"
             name="avatarFile"
             accept="image/png,image/jpeg,image/webp,image/gif"
-            className="flex-1 text-sm"
+            className="min-w-0 flex-1 text-sm"
           />
           <button
             type="submit"
@@ -73,7 +68,7 @@ function ResyncButton() {
   const [result, action, pending] = useActionState(resyncNow, null);
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border p-3">
+    <div className="flex flex-col items-start gap-3 rounded-lg border p-3 sm:flex-row sm:items-center">
       <form action={action}>
         <button
           type="submit"
@@ -121,175 +116,242 @@ export function AdminForm({ content }: { content: ProfileContentData }) {
       <ResyncButton />
       <AvatarUploader initialUrl={content.avatarUrl} />
 
-      <form id="profile-form" action={formAction} className="space-y-8">
-        <div className="space-y-4">
-          {fields.map((field) => (
-            <div key={field.name} className="space-y-2">
-              <label htmlFor={field.name} className="text-sm font-medium">
-                {field.label}
+      <form id="profile-form" action={formAction}>
+        {/* Single column on mobile/tablet, two columns on desktop:
+            profile fields on the left, curated lists on the right —
+            instead of one long single-column stack regardless of
+            screen width. */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  defaultValue={content.name}
+                  className={inputClass}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="role" className="text-sm font-medium">
+                  Role
+                </label>
+                <input
+                  id="role"
+                  name="role"
+                  defaultValue={content.role}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="bio" className="text-sm font-medium">
+                Bio
               </label>
               <input
-                id={field.name}
-                name={field.name}
-                type={field.type ?? "text"}
-                defaultValue={content[field.name] ?? ""}
-                className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                id="bio"
+                name="bio"
+                defaultValue={content.bio ?? ""}
+                className={inputClass}
               />
             </div>
-          ))}
-        </div>
 
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium">
-              Achievements ({items.length}/{MAX_FEATURED_ITEMS})
-            </h2>
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
+              <input
+                id="email"
+                name="email"
+                defaultValue={content.email}
+                className={inputClass}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label htmlFor="ctaText" className="text-sm font-medium">
+                  First button text (e.g. &quot;Hire Me&quot;)
+                </label>
+                <input
+                  id="ctaText"
+                  name="ctaText"
+                  defaultValue={content.ctaText}
+                  className={inputClass}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="ctaUrl" className="text-sm font-medium">
+                  First button link
+                </label>
+                <input
+                  id="ctaUrl"
+                  name="ctaUrl"
+                  defaultValue={content.ctaUrl}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            {message && (
+              <p role="status" className="text-sm text-muted-foreground">
+                {message}
+              </p>
+            )}
             <button
-              type="button"
-              disabled={items.length >= MAX_FEATURED_ITEMS}
-              onClick={() => setItems((prev) => [...prev, { ...EMPTY_ITEM }])}
-              className="text-sm font-medium underline underline-offset-4 disabled:opacity-40 disabled:no-underline"
+              type="submit"
+              disabled={pending}
+              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
             >
-              + Add
+              {pending ? "Saving..." : "Save"}
             </button>
           </div>
-          <p className="text-xs text-muted-foreground">
-            For platforms without live syncing (CodeChef, CSES, ICPC, etc.) —
-            e.g. &quot;CodeChef 4★&quot; or &quot;ICPC Regionalist 2025&quot;.
-          </p>
 
-          {items.map((item, index) => (
-            <div
-              key={index}
-              className="space-y-2 rounded-lg border p-3"
-            >
+          <div className="space-y-6">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-muted-foreground">
-                  Item {index + 1}
-                </span>
+                <h2 className="text-sm font-medium">
+                  Achievements ({items.length}/{MAX_FEATURED_ITEMS})
+                </h2>
                 <button
                   type="button"
-                  onClick={() => removeItem(index)}
-                  className="text-xs font-medium text-destructive underline underline-offset-4"
+                  disabled={items.length >= MAX_FEATURED_ITEMS}
+                  onClick={() => setItems((prev) => [...prev, { ...EMPTY_ITEM }])}
+                  className="text-sm font-medium underline underline-offset-4 disabled:opacity-40 disabled:no-underline"
                 >
-                  Remove
+                  + Add
                 </button>
               </div>
-              <input
-                placeholder="Title (e.g. CodeChef 4★)"
-                value={item.title}
-                onChange={(e) => updateItem(index, { title: e.target.value })}
-                className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              <input
-                placeholder="Description (e.g. Rating 1847)"
-                value={item.description}
-                onChange={(e) =>
-                  updateItem(index, { description: e.target.value })
-                }
-                className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-              <input
-                placeholder="Link (optional)"
-                value={item.url}
-                onChange={(e) => updateItem(index, { url: e.target.value })}
-                className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              />
-            </div>
-          ))}
+              <p className="text-xs text-muted-foreground">
+                For platforms without live syncing (CodeChef, CSES, ICPC, etc.) —
+                e.g. &quot;CodeChef 4★&quot; or &quot;ICPC Regionalist 2025&quot;.
+              </p>
 
-          <input type="hidden" name="featuredItems" value={JSON.stringify(items)} />
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-sm font-medium">
-              Platform Links ({links.length}/{MAX_PLATFORM_LINKS})
-            </h2>
-            <button
-              type="button"
-              disabled={links.length >= MAX_PLATFORM_LINKS}
-              onClick={() =>
-                setLinks((prev) => [...prev, { ...EMPTY_PLATFORM_LINK }])
-              }
-              className="text-sm font-medium underline underline-offset-4 disabled:opacity-40 disabled:no-underline"
-            >
-              + Add
-            </button>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Circular logo icons linking out to your profile on each platform
-            — click the circle on the home page to open the link.
-          </p>
-
-          {links.map((link, index) => (
-            <div key={index} className="flex items-start gap-3 rounded-lg border p-3">
-              {/* eslint-disable-next-line @next/next/no-img-element -- preview of an admin-supplied arbitrary logo URL */}
-              <img
-                src={link.logoUrl || "https://placehold.co/40"}
-                alt=""
-                className="mt-0.5 h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-border"
-              />
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Link {index + 1}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => removeLink(index)}
-                    className="text-xs font-medium text-destructive underline underline-offset-4"
-                  >
-                    Remove
-                  </button>
+              {items.map((item, index) => (
+                <div key={index} className="space-y-2 rounded-lg border p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      Item {index + 1}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => removeItem(index)}
+                      className="text-xs font-medium text-destructive underline underline-offset-4"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <input
+                    placeholder="Title (e.g. CodeChef 4★)"
+                    value={item.title}
+                    onChange={(e) => updateItem(index, { title: e.target.value })}
+                    className={inputClass}
+                  />
+                  <input
+                    placeholder="Description (e.g. Rating 1847)"
+                    value={item.description}
+                    onChange={(e) =>
+                      updateItem(index, { description: e.target.value })
+                    }
+                    className={inputClass}
+                  />
+                  <input
+                    placeholder="Link (optional)"
+                    value={item.url}
+                    onChange={(e) => updateItem(index, { url: e.target.value })}
+                    className={inputClass}
+                  />
                 </div>
-                <input
-                  placeholder="Name (e.g. Codeforces)"
-                  value={link.name}
-                  onChange={(e) => updateLink(index, { name: e.target.value })}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-                <input
-                  placeholder="Logo image URL"
-                  value={link.logoUrl}
-                  onChange={(e) =>
-                    updateLink(index, { logoUrl: e.target.value })
-                  }
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-                <input
-                  placeholder="Link URL"
-                  value={link.url}
-                  onChange={(e) => updateLink(index, { url: e.target.value })}
-                  className="w-full rounded-lg border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                />
-              </div>
+              ))}
+
+              <input
+                type="hidden"
+                name="featuredItems"
+                value={JSON.stringify(items)}
+              />
             </div>
-          ))}
 
-          <input type="hidden" name="platformLinks" value={JSON.stringify(links)} />
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-medium">
+                  Platform Links ({links.length}/{MAX_PLATFORM_LINKS})
+                </h2>
+                <button
+                  type="button"
+                  disabled={links.length >= MAX_PLATFORM_LINKS}
+                  onClick={() =>
+                    setLinks((prev) => [...prev, { ...EMPTY_PLATFORM_LINK }])
+                  }
+                  className="text-sm font-medium underline underline-offset-4 disabled:opacity-40 disabled:no-underline"
+                >
+                  + Add
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Circular logo icons linking out to your profile on each platform
+                — click the circle on the home page to open the link.
+              </p>
+
+              {links.map((link, index) => (
+                <div
+                  key={index}
+                  className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-start"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element -- preview of an admin-supplied arbitrary logo URL */}
+                  <img
+                    src={link.logoUrl || "https://placehold.co/40"}
+                    alt=""
+                    className="h-10 w-10 shrink-0 rounded-full object-cover ring-1 ring-border sm:mt-0.5"
+                  />
+                  <div className="min-w-0 flex-1 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-medium text-muted-foreground">
+                        Link {index + 1}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeLink(index)}
+                        className="text-xs font-medium text-destructive underline underline-offset-4"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <input
+                      placeholder="Name (e.g. Codeforces)"
+                      value={link.name}
+                      onChange={(e) => updateLink(index, { name: e.target.value })}
+                      className={inputClass}
+                    />
+                    <input
+                      placeholder="Logo image URL"
+                      value={link.logoUrl}
+                      onChange={(e) =>
+                        updateLink(index, { logoUrl: e.target.value })
+                      }
+                      className={inputClass}
+                    />
+                    <input
+                      placeholder="Link URL"
+                      value={link.url}
+                      onChange={(e) => updateLink(index, { url: e.target.value })}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+              ))}
+
+              <input
+                type="hidden"
+                name="platformLinks"
+                value={JSON.stringify(links)}
+              />
+            </div>
+          </div>
         </div>
-
-        {message && (
-          <p role="status" className="text-sm text-muted-foreground">
-            {message}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={pending}
-          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
-        >
-          {pending ? "Saving..." : "Save"}
-        </button>
-      </form>
-      <form action={logout}>
-        <button
-          type="submit"
-          className="text-sm font-medium underline underline-offset-4"
-        >
-          Sign out
-        </button>
       </form>
     </div>
   );

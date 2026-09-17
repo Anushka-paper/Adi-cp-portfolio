@@ -158,20 +158,30 @@
   background-color: var(--foreground);
 }
 
-/* Applied to <html> only while the theme toggle's ripple is running
-   (theme-toggle.tsx), so every component's colors cross-fade alongside
-   it instead of snapping instantly the moment the .dark/.light class
-   flips — snapping looked jarring once the ripple stopped painting
-   over content and content became visible underneath it throughout.
-   Scoped to this class (not applied globally at all times) so it
-   doesn't add a transition to every color change on the page, only to
-   the ones caused by an actual theme switch. */
-.theme-transitioning,
-.theme-transitioning * {
-  transition:
-    background-color 420ms cubic-bezier(0.4, 0, 0.2, 1),
-    color 420ms cubic-bezier(0.4, 0, 0.2, 1),
-    border-color 420ms cubic-bezier(0.4, 0, 0.2, 1),
-    fill 420ms cubic-bezier(0.4, 0, 0.2, 1),
-    stroke 420ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+/* Circular reveal for the dark/light toggle (theme-toggle.tsx), via the
+   View Transitions API. Disable the browser's default cross-fade so it
+   doesn't fight with our clip-path circle animation. Which snapshot
+   layer sits on top depends on direction — set via a class the toggle
+   adds to <html> right before starting the transition:
+   - going dark: the incoming (new) snapshot is on top, growing a
+     circle out from the click point to reveal itself over the old one.
+   - going light: the outgoing (old) snapshot is on top instead,
+     shrinking its circle back down to the click point to uncover the
+     new snapshot beneath it, which is already fully painted. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+html.vt-dir-dark::view-transition-new(root) {
+  z-index: 2;
+}
+html.vt-dir-dark::view-transition-old(root) {
+  z-index: 1;
+}
+html.vt-dir-light::view-transition-old(root) {
+  z-index: 2;
+}
+html.vt-dir-light::view-transition-new(root) {
+  z-index: 1;
 }

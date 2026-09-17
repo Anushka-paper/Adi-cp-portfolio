@@ -46,72 +46,61 @@ export function ThemeToggle() {
       }
     }
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    if (
+      !document.startViewTransition ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
       commit();
       return;
     }
 
-    // Direction-dependent ripple behind the page content (rather than
-    // the previous View Transitions clip-path reveal, which animates a
-    // full-page screenshot and noticeably dropped frames on mobile):
-    // going dark GROWS a circle of the new dark color out from the
-    // click point; going light SHRINKS a circle of the old dark color
-    // back down to the click point. The real theme now commits
-    // immediately in both cases — every component's own colors fade
-    // smoothly alongside the ripple via the `.theme-transitioning` CSS
-    // class (globals.css) instead of snapping instantly, which looked
-    // jarring once the ripple stopped painting over content.
-    const outgoingColor = getComputedStyle(document.body).backgroundColor;
-
-    // Adding the class and flipping the theme in the same tick would let
-    // the browser coalesce both into one style recalc, with no "before"
-    // frame to transition from — so nothing would actually animate.
-    // Reading a layout property forces a synchronous reflow in between,
-    // making sure `.theme-transitioning` is on record before the colors
-    // it's meant to animate actually change.
-    root.classList.add("theme-transitioning");
-    void root.offsetHeight;
-    commit();
-    const incomingColor = getComputedStyle(document.body).backgroundColor;
+    // The View Transitions API snapshots the whole page (colors, text,
+    // icons — everything) both before and after `commit()`, so the
+    // circle we clip-path-animate is a real cross-fade of the entire
+    // UI, not just a flat color — every component's colors change
+    // together, in the same motion, with no separate per-element
+    // transition to keep in sync.
+    //
+    // `.vt-dir-dark` / `.vt-dir-light` (globals.css) pick which
+    // snapshot layer sits on top: going dark, the new (incoming) layer
+    // is on top and its circle grows from the click point, revealing
+    // it over the old layer. Going light, the old (outgoing) layer is
+    // on top instead and its circle shrinks back down to the click
+    // point, uncovering the new layer that's already fully painted
+    // underneath — the requested spread-when-dark / shrink-when-light.
+    root.classList.add(next ? "vt-dir-dark" : "vt-dir-light");
 
     const x = event.clientX;
     const y = event.clientY;
-    const endRadius = Math.hypot(
-      Math.max(x, window.innerWidth - x),
-      Math.max(y, window.innerHeight - y),
-    );
-    const diameter = endRadius * 2;
-
-    // z-index: -1 keeps this behind every normal (non-positioned) page
-    // element — cards, buttons, text all stay fully visible throughout
-    // the animation instead of being covered by it. The ripple only
-    // shows up through the page's own background, not over content.
-    const ripple = document.createElement("div");
-    ripple.style.position = "fixed";
-    ripple.style.left = `${x - endRadius}px`;
-    ripple.style.top = `${y - endRadius}px`;
-    ripple.style.width = `${diameter}px`;
-    ripple.style.height = `${diameter}px`;
-    ripple.style.borderRadius = "9999px";
-    ripple.style.pointerEvents = "none";
-    ripple.style.zIndex = "-1";
-    ripple.style.willChange = "transform";
-    ripple.style.backgroundColor = next ? incomingColor : outgoingColor;
-    ripple.style.transform = next ? "scale(0)" : "scale(1)";
-    document.body.appendChild(ripple);
 
     animatingRef.current = true;
-    const anim = ripple.animate(
-      next
-        ? [{ transform: "scale(0)" }, { transform: "scale(1)" }]
-        : [{ transform: "scale(1)" }, { transform: "scale(0)" }],
-      { duration: 420, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
-    );
-    anim.onfinish = () => {
-      ripple.remove();
-      root.classList.remove("theme-transitioning");
+    const transition = document.startViewTransition(commit);
+
+    transition.ready.then(() => {
+      const endRadius = Math.hypot(
+        Math.max(x, window.innerWidth - x),
+        Math.max(y, window.innerHeight - y),
+      );
+      const clipPath = next
+        ? [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`]
+        : [`circle(${endRadius}px at ${x}px ${y}px)`, `circle(0px at ${x}px ${y}px)`];
+
+      document.documentElement.animate(
+        { clipPath },
+        {
+          duration: 500,
+          easing: "ease-in-out",
+          pseudoElement: next
+            ? "::view-transition-new(root)"
+            : "::view-transition-old(root)",
+        },
+      );
+    });
+
+    transition.finished.finally(() => {
+      root.classList.remove("vt-dir-dark", "vt-dir-light");
       animatingRef.current = false;
-    };
+    });
   }
 
   return (

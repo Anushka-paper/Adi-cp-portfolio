@@ -66,17 +66,18 @@ export function ThemeToggle() {
       return;
     }
 
-    // A ripple that spreads out from the click point to fully cover the
-    // viewport, then contracts back down to nothing at the same point —
-    // rather than the previous View Transitions clip-path reveal, which
-    // animates a full-page screenshot and noticeably dropped frames on
-    // mobile (tall pages make for a large snapshot to clip-path every
-    // frame). This is a single small `<div>` animated purely via
-    // `transform: scale(...)`, which the compositor can run smoothly
-    // without any repaint of the underlying page.
+    // Direction-dependent single-phase ripple, rather than the previous
+    // View Transitions clip-path reveal (which animates a full-page
+    // screenshot and noticeably dropped frames on mobile — tall pages
+    // make for a large snapshot to clip-path every frame). This is a
+    // small `<div>` animated purely via `transform: scale(...)`, which
+    // the compositor can run smoothly without repainting the page:
+    // going dark GROWS a circle of the incoming dark color out from the
+    // click point (spread); going light SHRINKS a circle of the
+    // outgoing dark color back down to the click point (contract),
+    // uncovering the already-switched light page as it recedes.
     const x = event.clientX;
     const y = event.clientY;
-    const newBg = getBackgroundColorForTheme(next);
     const endRadius = Math.hypot(
       Math.max(x, window.innerWidth - x),
       Math.max(y, window.innerHeight - y),
@@ -90,32 +91,48 @@ export function ThemeToggle() {
     ripple.style.width = `${diameter}px`;
     ripple.style.height = `${diameter}px`;
     ripple.style.borderRadius = "9999px";
-    ripple.style.backgroundColor = newBg;
     ripple.style.pointerEvents = "none";
     ripple.style.zIndex = "2147483647";
-    ripple.style.transform = "scale(0)";
     ripple.style.willChange = "transform";
-    document.body.appendChild(ripple);
 
     animatingRef.current = true;
-    const spread = ripple.animate(
-      [{ transform: "scale(0)" }, { transform: "scale(1)" }],
-      { duration: 380, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
-    );
 
-    spread.onfinish = () => {
-      // Flip the real theme now, while the ripple still fully covers
-      // the screen at the same color — the swap itself is invisible.
+    if (next) {
+      // Going dark: grow a dark circle from nothing, then commit once
+      // it fully covers the screen — the swap is invisible since the
+      // ripple already matches the real background at that instant.
+      ripple.style.backgroundColor = getBackgroundColorForTheme(true);
+      ripple.style.transform = "scale(0)";
+      document.body.appendChild(ripple);
+
+      const spread = ripple.animate(
+        [{ transform: "scale(0)" }, { transform: "scale(1)" }],
+        { duration: 420, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
+      );
+      spread.onfinish = () => {
+        commit();
+        ripple.remove();
+        animatingRef.current = false;
+      };
+    } else {
+      // Going light: commit immediately behind a circle already covering
+      // the screen in the outgoing dark color, then shrink that circle
+      // back down to the click point — revealing the real (now light)
+      // page underneath as it recedes.
+      ripple.style.backgroundColor = getComputedStyle(document.body).backgroundColor;
+      ripple.style.transform = "scale(1)";
+      document.body.appendChild(ripple);
       commit();
+
       const contract = ripple.animate(
         [{ transform: "scale(1)" }, { transform: "scale(0)" }],
-        { duration: 380, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
+        { duration: 420, easing: "cubic-bezier(0.4, 0, 0.2, 1)", fill: "forwards" },
       );
       contract.onfinish = () => {
         ripple.remove();
         animatingRef.current = false;
       };
-    };
+    }
   }
 
   return (

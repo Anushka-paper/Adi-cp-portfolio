@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface AchievementCardProps {
   title: string;
@@ -6,9 +7,11 @@ interface AchievementCardProps {
   url: string;
 }
 
-// For platforms without a live-sync adapter (CodeChef, CSES, ICPC —
-// no public API, no per-user profile, or not a personal-rating
-// platform at all; see progress-tracker.md). Owner-curated via /admin.
+// Styled to match PlatformCard exactly (badge, bold headline, muted
+// subtitle, link) so it reads as the same kind of card in the grid —
+// see progress-tracker.md for why these can't be real sync adapters
+// (CodeChef: no public API, CSES: no per-user API/profile at all,
+// ICPC: not a personal-rating platform). Owner-curated via /admin.
 export function AchievementCard({
   title,
   description,
@@ -16,12 +19,13 @@ export function AchievementCard({
 }: AchievementCardProps) {
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>{title}</CardTitle>
+        <Badge variant="secondary">featured</Badge>
       </CardHeader>
       <CardContent className="space-y-2">
         {description && (
-          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-2xl font-semibold">{description}</p>
         )}
         {url && (
           <a

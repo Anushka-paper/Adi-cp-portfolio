@@ -107,11 +107,9 @@ export default async function Home() {
           ))
         )}
 
-        {content.featuredItems.length > 0 && (
-          <h2 className="text-lg font-semibold tracking-tight sm:col-span-2 lg:col-span-12">
-            Achievements
-          </h2>
-        )}
+        {/* No separate "Achievements" heading — these are styled
+            identically to the platform cards above and just extend
+            the same grid, rather than reading as a distinct section. */}
         {content.featuredItems.map((item) => (
           <div key={item.title} className="lg:col-span-4">
             <AchievementCard {...item} />
